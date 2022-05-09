@@ -7,6 +7,7 @@ import csv
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
+import random
 
 # Ignore warnings
 import warnings
@@ -17,7 +18,7 @@ warnings.filterwarnings("ignore")
 
 class ArticlesDataset(Dataset):
 
-    def __init__(self, images_dir,transactions_dir, transform=None):
+    def __init__(self, images_dir, transactions_dir, transform=None):
         """
         Args:
             images_dir (string): Directory with all the images.
@@ -25,7 +26,7 @@ class ArticlesDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.images_dir = images_dir
         self.transform = transform
         df =  pd.read_csv(transactions_dir)
@@ -76,7 +77,7 @@ class ArticlesDataset(Dataset):
             image = self.transform(image)
 
         label_images = self.relevant[article_id[:-4]]
-        label = torch.zeros(len(self.index),device = device,dtype=torch.float64)
+        label = torch.zeros(len(self.index),device=self.device,dtype=torch.float64)
         for i in self.index[article_id]:
             label[i] = 1/i
 
@@ -147,7 +148,7 @@ class ToTensor(object):
         img = image.transpose((2, 0, 1))
         return {'image':torch.from_numpy(img).to(device),'label':torch.from_numpy(label).to(device)}
 
-class Model(nn.Module):
+class Model(torch.nn.Module):
 
     def __init__(self,num_articles,activation = torch.nn.ReLU()) :
         super().__init__()
@@ -220,7 +221,7 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform
     submission_file = open(pred_dir,'w')
     # no worries of a second execution : we overwrite what's already existing in the submission file
 
-    submission = csv.writer(submisson_file,delimiter=',')
+    submission = csv.writer(submission_file,delimiter=',')
 
     for i,row in customers.iterrows():
         line = [row['customer_id']]
@@ -247,9 +248,9 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform
 if __name__ == '__main__':
     batch_size = 16
     num_articles = len(os.listdir('~/data/images__all/')) #105100
-    transform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
-    dataset = ArticlesDataset(images_dir = '~/data/images__all/',transactions_dir = '~/data/transactions_train.csv',transform=transform)
+    myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
+    dataset = ArticlesDataset(images_dir = '~/data/images__all/',transactions_dir = '~/data/transactions_train.csv',transform=myTransform)
     training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 0)
     model = Model()
     trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,batch_size = 16,rate = 1e-2)
-    predictions(model,tr_dir='~/data/transactions_train.csv',cust_dir='~/data/customers.csv',pred_dir='~/data/submission.csv',images_dir='~/data/images__all/',num_articles=num_articles,transform=transform)
+    predictions(model,tr_dir='~/data/transactions_train.csv',cust_dir='~/data/customers.csv',pred_dir='~/data/submission.csv',images_dir='~/data/images__all/',num_articles=num_articles,transform=myTransform)
