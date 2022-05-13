@@ -291,22 +291,24 @@ def lossPlot(loss):
 if __name__ == '__main__':
     start_time = time.time()
     print(torch.cuda.is_available())
-    '''
     images_dir = '~/data/images__all/'
     transactions_dir = '~/data/transactions_train.csv'
-    cutomers_dir = '~/data/customers.csv'
+    transactions_dir_train = '~/data/transactions_train_train.csv'
+    transactions_dir_test = '~/data/transactions_train_test.csv'
+    customers_dir = '~/data/customers.csv'
     predictions_dir='~/data/submission.csv'
     '''
     images_dir = './data/images/images_test/'
     transactions_dir = './data/transactions_train_10.csv'
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
+    '''
     batch_size = 64
     train_period = 10
     num_recomm = 12
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
-    dataset = ArticlesDataset(images_dir = images_dir,transactions_dir = transactions_dir,transform=myTransform)
+    dataset = ArticlesDataset(images_dir = images_dir,transactions_dir = transactions_dir_train,transform=myTransform)
     print("dataset : --- %s seconds ---" % (time.time() - start_time))
     training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 0)
     model = Model(num_articles=num_articles)
@@ -314,10 +316,13 @@ if __name__ == '__main__':
         model.cuda()
     train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 10,rate = 1e-2, train_period=train_period)
     torch.save(model.state_dict(), "model.pt")
+    lossPlot(train_loss)
     print("training : --- %s seconds ---" % (time.time() - start_time))
 
+    '''
     model0 = Model(num_articles=num_articles)
     model0.load_state_dict(torch.load("model.pt"))
     model0.eval()
-    predictions(model0,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
+    '''
+    predictions(model,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
