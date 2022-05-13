@@ -9,6 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import random
 import time
+import cloudpickle as pickle
 
 # Ignore warnings
 import warnings
@@ -203,11 +204,13 @@ def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_article
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     recommandations = {}
+    is_active = {}
 
     # all customers : there are new customers in customers.csv
     customers = pd.read_csv(cust_dir)
     for i,row in customers.iterrows():
         recommandations[row['customer_id']] = torch.zeros(num_articles,dtype=torch.float32)
+        is_active[row['customer_id']] = False
 
     # making recommandations based on previous transactions
     transactions = pd.read_csv(tr_dir)
@@ -215,13 +218,14 @@ def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_article
 
         assert row['customer_id'] in recommandations
 
+        is_active[row['customer_id']] = True
         image_id = row['article_id']
         img_name = os.path.join(images_dir,'0'+str(image_id)+'.jpg')
         image = io.imread(img_name)
         if transform:
             image = transform(image)
         image = image.to(device)
-        recommandations[row['customer_id']] += model(image.unsqueeze(0)).squeeze(0)
+        recommandations[row['customer_id']] += model(image.unsqueeze(0)).squeeze(0).to('cpu')
 
     submission_file = open(pred_dir,'w')
     # no worries of a second execution : we overwrite what's already existing in the submission file
@@ -235,7 +239,7 @@ def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_article
         articles = ""
         reccs = recommandations[row['customer_id']]
 
-        if(torch.equal(reccs,torch.zeros(num_articles,dtype=torch.float32))):
+        if(not(is_active[row['customer_id']])):
             # new customer : generate num_reccom random articles
             for _ in range(num_reccom-1):
                 articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]+" "
@@ -251,7 +255,6 @@ def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_article
 
     submission_file.close()
 
-def torch_saver(model,)
 if __name__ == '__main__':
     start_time = time.time()
     print(torch.cuda.is_available())
@@ -276,6 +279,11 @@ if __name__ == '__main__':
     if(torch.cuda.is_available()):
         model.cuda()
     trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2)
+    torch.save(model.state_dict(), "model.pt")
     print("training : --- %s seconds ---" % (time.time() - start_time))
-    predictions(model,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
+
+    model0 = Model(num_articles=num_articles)
+    model0.load_state_dict(torch.load("model.pt"))
+    model0.eval()
+    predictions(model0,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
