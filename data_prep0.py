@@ -168,8 +168,8 @@ class Model(torch.nn.Module):
         z = self.dense6(z)
         return z
 
-def trainer(training_generator,model,loss_fn,epoch,rate) :
-    optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4)
+def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
+    optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4,)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -193,9 +193,11 @@ def trainer(training_generator,model,loss_fn,epoch,rate) :
             running_loss += loss.item() * y.size(0)
             
             if j % train_period == train_period-1:
-                print('[%d, %5d] loss: %.3f' %(i + 1, j + 1, loss.item()))
+                print('epoch:%d, period:%d running loss: %.3f' %(i + 1, j + 1, loss.item()))
         
-        train_loss.append(running_loss / total)
+        running_loss = running_loss/total
+        print('epoch:% average loss: %.3f' %(i + 1, running_loss))
+        train_loss.append(running_loss)
         
     return train_loss
         
@@ -285,7 +287,9 @@ if __name__ == '__main__':
     model = Model(num_articles=num_articles)
     if(torch.cuda.is_available()):
         model.cuda()
-    trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2)
+        
+    
+    train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2, train_period = 1)
     print("training : --- %s seconds ---" % (time.time() - start_time))
     predictions(model,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
