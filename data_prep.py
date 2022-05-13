@@ -292,20 +292,20 @@ if __name__ == '__main__':
     start_time = time.time()
     print(torch.cuda.is_available())
 
-    images_dir = '~/data/images__all/'
-    transactions_dir = '~/data/transactions_train.csv'
-    transactions_dir_train = '~/data/transactions_train_train.csv'
-    transactions_dir_test = '~/data/transactions_train_test.csv'
-    customers_dir = '~/data/customers.csv'
-    predictions_dir='~/data/submission.csv'
+    images_dir = '/home/aymen/data/images__all/'
+    transactions_dir = '/home/aymen/data/transactions_train.csv'
+    transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
+    transactions_dir_test = '/home/aymen/data/transactions_train_test.csv'
+    customers_dir = '/home/aymen/data/customers.csv'
+    predictions_dir='/home/aymen/data/submission.csv'
     '''
     images_dir = './data/images/images_test/'
     transactions_dir_train = './data/transactions_train_10.csv'
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
     '''
-    model_submit_dir = '~/data/model.pt'
-    loss_dir = '~/data/'
+    model_submit_dir = '/home/aymen/data/model.pt'
+    loss_dir = '/home/aymen/data/'
     batch_size = 64
     train_period = 10
     num_recomm = 12
