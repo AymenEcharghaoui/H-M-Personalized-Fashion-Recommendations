@@ -206,8 +206,12 @@ def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
         train_loss.append(running_loss)
         
     return train_loss
+def score(model,images_dir,num_articles,tr_dir,num_recomm=12,transform=None):
+    """
+    return MAP@12
+    """
 
-def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform=None) :
+def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_reccom=12,transform=None) :
     """
     store a sample submission csv file in pred_dir
     Args :
@@ -297,8 +301,9 @@ if __name__ == '__main__':
     transactions_dir = './data/transactions_train_10.csv'
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
-    batch_size = 16
-    num_recomm = 6
+    batch_size = 64
+    train_period = 10
+    num_recomm = 12
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     dataset = ArticlesDataset(images_dir = images_dir,transactions_dir = transactions_dir,transform=myTransform)
@@ -307,9 +312,7 @@ if __name__ == '__main__':
     model = Model(num_articles=num_articles)
     if(torch.cuda.is_available()):
         model.cuda()
-    train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2, train_period = 1)
-    
-    
+    train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 10,rate = 1e-2, train_period=train_period)
     torch.save(model.state_dict(), "model.pt")
     print("training : --- %s seconds ---" % (time.time() - start_time))
 

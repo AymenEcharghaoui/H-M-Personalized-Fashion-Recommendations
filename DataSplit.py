@@ -27,7 +27,7 @@ def dataHead(dataAdress, usecols, head):
     return df
     
 if __name__ == '__main__':
-    dataAdress = "./data/transactions_train.csv"
+    dataAdress = "~/data/transactions_train.csv"
     # df = pd.read_csv(dataAdress)
     # print(df.iloc[-1])
     '''
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     Name: 31788323, dtype: object
     '''
     
-    # usecols=['t_dat','customer_id','article_id']
-    # dataSplit(dataAdress, usecols, '2020-09-15')
+    usecols=['t_dat','customer_id','article_id']
+    dataSplit(dataAdress, usecols, '2020-09-15')
     
     # dataHead(dataAdress, usecols, head=10)
     
