@@ -276,21 +276,22 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_recco
 
     submission_file.close()
     
-def lossPlot(loss):
+def lossPlot(loss,dir):
     plt.plot(loss,label = "loss for training set")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.legend()
-    plt.savefig("./loss_curves.png")
+    plt.savefig(dir+"loss_curves.png")
     
-    file = open("./loss.txt", "w")
+    file = open(dir+"loss.txt", "w")
     for element in loss:
-        file.write(element + "\n")
+        file.write(str(element) + "\n")
     file.close()
 
 if __name__ == '__main__':
     start_time = time.time()
     print(torch.cuda.is_available())
+
     images_dir = '~/data/images__all/'
     transactions_dir = '~/data/transactions_train.csv'
     transactions_dir_train = '~/data/transactions_train_train.csv'
@@ -299,10 +300,12 @@ if __name__ == '__main__':
     predictions_dir='~/data/submission.csv'
     '''
     images_dir = './data/images/images_test/'
-    transactions_dir = './data/transactions_train_10.csv'
+    transactions_dir_train = './data/transactions_train_10.csv'
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
     '''
+    model_submit_dir = '~/data/model.pt'
+    loss_dir = '~/data/'
     batch_size = 64
     train_period = 10
     num_recomm = 12
@@ -314,9 +317,9 @@ if __name__ == '__main__':
     model = Model(num_articles=num_articles)
     if(torch.cuda.is_available()):
         model.cuda()
-    train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 10,rate = 1e-2, train_period=train_period)
-    torch.save(model.state_dict(), "model.pt")
-    lossPlot(train_loss)
+    train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 10,rate = 1e-3, train_period=train_period)
+    torch.save(model.state_dict(), model_submit_dir)
+    lossPlot(train_loss,loss_dir)
     print("training : --- %s seconds ---" % (time.time() - start_time))
 
     '''
