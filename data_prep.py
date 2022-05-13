@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import random
+import time
 
 # Ignore warnings
 import warnings
@@ -26,7 +27,6 @@ class ArticlesDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.images_dir = images_dir
         self.transform = transform
         df =  pd.read_csv(transactions_dir)
@@ -35,33 +35,33 @@ class ArticlesDataset(Dataset):
         # build relevant articles for each image
         # put all customers
         for i,row in df.iterrows():
-            transactions[row['customer_id']] = []
+            transactions[row['customer_id']] = set()
 
         # put all transactions
         for i,row in df.iterrows():
             customer = row['customer_id']
             article = row['article_id']
-            transactions[customer].append(article)
+            transactions[customer].add(article)
 
         # get all relevant articles for each p_article
         self.relevant = {}
 
         # put all articles
         for i,row in df.iterrows():
-            self.relevant[row['article_id']] = {}
+            self.relevant[row['article_id']] = set()
 
         # populate --relevant
         for customer in transactions:
             for p_article in transactions[customer]:
                 for article in transactions[customer]:
                     if(article != p_article):
-                        self.relevant[p_article][article]=0
+                        self.relevant[p_article].add(article)
 
         # build an index of all image files
         self.index = {}
         i = 0
         for image in os.listdir(self.images_dir):
-            self.index[image[:-4]] = i
+            self.index[int(image[:-4])] = i
             i += 1
 
     def __len__(self):
@@ -73,15 +73,16 @@ class ArticlesDataset(Dataset):
         img_name = os.path.join(self.images_dir,article_id)
         image = io.imread(img_name)
 
+        label_images = self.relevant[int(article_id[:-4])]
+        label = torch.zeros(len(self.index),dtype=torch.float32)
+
+        for article in label_images:
+            label[self.index[article]] = 1/len(label_images)
+        
         if self.transform:
-            image = self.transform(image)
-
-        label_images = self.relevant[article_id[:-4]]
-        label = torch.zeros(len(self.index),device=self.device,dtype=torch.float64)
-        for i in self.index[article_id]:
-            label[i] = 1/i
-
-        return {'image':image,'label':label}
+            return (self.transform(image),label)
+        
+        return (image,label)
 
 
 class Rescale(object):
@@ -93,14 +94,17 @@ class Rescale(object):
 
     def __init__(self, output_size):
 
-        assert isinstance(output_size, tuple)
-        self.output_size = output_size
+        assert isinstance(output_size, (int, tuple))
+        if isinstance(output_size, int):
+            self.output_size = (output_size, output_size)
+        else:
+            assert len(output_size) == 2
+            self.output_size = output_size
 
-    def __call__(self, sample):
+    def __call__(self, image):
 
-        image,label = sample['image'],sample['label']
         img = transform.resize(image, self.output_size)
-        return {'image':img,'label':label}
+        return img
 
 
 class RandomCrop(object):
@@ -119,45 +123,43 @@ class RandomCrop(object):
             assert len(output_size) == 2
             self.output_size = output_size
 
-    def __call__(self, sample):
+    def __call__(self, image):
 
-        image,label = sample['image'],sample['label']
         h, w = image.shape[:2]
         new_h, new_w = self.output_size
 
-        top = torch.randint(0, h - new_h)
-        left = torch.randint(0, w - new_w)
+        top = random.randint(0, h - new_h)
+        left = random.randint(0, w - new_w)
 
         img = image[top: top + new_h,
                       left: left + new_w]
 
-        return {'image':img,'label':label}
+        return img
 
 
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
-    def __call__(self, sample):
+    def __call__(self, image):
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        image,label = sample['image'],sample['label']
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C x H x W
         img = image.transpose((2, 0, 1))
-        return {'image':torch.from_numpy(img).to(device),'label':torch.from_numpy(label).to(device)}
+        return torch.from_numpy(img).type(torch.float32)
 
 class Model(torch.nn.Module):
 
     def __init__(self,num_articles,activation = torch.nn.ReLU()) :
         super().__init__()
-        self.conv1 = torch.nn.Conv2d(1,6,kernel_size=1,stride=1,padding=0)
+        self.conv1 = torch.nn.Conv2d(3,6,kernel_size=3,stride=1,padding=1)
         self.pool2 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
-        self.conv3 = torch.nn.Conv2d(6,16,kernel_size=1,stride=1,padding=0)
+        self.conv3 = torch.nn.Conv2d(6,16,kernel_size=3,stride=1,padding=1)
         self.pool4 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
-        self.dense5 = torch.nn.Linear(16*56*56,num_articles/2)
-        self.dense6 = torch.nn.Linear(num_articles/2,num_articles)
+        self.dense5 = torch.nn.Linear(16*56*56,int(num_articles/2))
+        self.dense6 = torch.nn.Linear(int(num_articles/2),num_articles)
         self.activation = activation
 
     def forward(self,x) :
@@ -171,20 +173,23 @@ class Model(torch.nn.Module):
         z = self.dense6(z)
         return z
 
-def trainer(training_generator,model,loss_fn,epoch,batch_size,rate) :
+def trainer(training_generator,model,loss_fn,epoch,rate) :
     optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     for _ in range(epoch):
         for sample_batched in training_generator:
-            x = sample_batched['image']
-            y = sample_batched['label']
+            x,y = sample_batched
+            x = x.to(device)
+            y = y.to(device)
             optimizer.zero_grad()
             y_pred = model(x)
             loss = loss_fn(y_pred, y)
             loss.backward()
             optimizer.step()
 
-def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform=None) :
+def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform=None) :
     """
     store a sample submission csv file in pred_dir
     Args :
@@ -202,7 +207,7 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform
     # all customers : there are new customers in customers.csv
     customers = pd.read_csv(cust_dir)
     for i,row in customers.iterrows():
-        recommandations[customers['id']] = torch.zeros(num_articles,device = device,dtype=torch.float64)
+        recommandations[row['customer_id']] = torch.zeros(num_articles,dtype=torch.float32)
 
     # making recommandations based on previous transactions
     transactions = pd.read_csv(tr_dir)
@@ -211,46 +216,66 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform
         assert row['customer_id'] in recommandations
 
         image_id = row['article_id']
-        img_name = os.path.join(images_dir,image_id+'.jpg')
+        img_name = os.path.join(images_dir,'0'+str(image_id)+'.jpg')
         image = io.imread(img_name)
         if transform:
             image = transform(image)
-
-        recommandations[row['customer_id']] += model(image)
+        image = image.to(device)
+        recommandations[row['customer_id']] += model(image.unsqueeze(0)).squeeze(0)
 
     submission_file = open(pred_dir,'w')
     # no worries of a second execution : we overwrite what's already existing in the submission file
 
     submission = csv.writer(submission_file,delimiter=',')
 
+    submission.writerow(['customer_id','prediction'])
+
     for i,row in customers.iterrows():
         line = [row['customer_id']]
         articles = ""
         reccs = recommandations[row['customer_id']]
 
-        if(torch.equal(reccs,torch.zeros(num_articles,device = device,dtype=torch.float64))):
-            # new customer : generate 12 random articles
-            for _ in range(11):
+        if(torch.equal(reccs,torch.zeros(num_articles,dtype=torch.float32))):
+            # new customer : generate num_reccom random articles
+            for _ in range(num_reccom-1):
                 articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]+" "
             articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]
         else:
-            indices = reccs.topk(12).indices
-            for i in range(11):
-                articles += os.listdir(images_dir)[indices[i]]+ " "
-            articles += os.listdir(images_dir)[indices[11]]
+            indices = reccs.topk(num_reccom).indices
+            for i in range(num_reccom-1):
+                articles += os.listdir(images_dir)[indices[i]][:-4]+ " "
+            articles += os.listdir(images_dir)[indices[num_reccom-1]][:-4]
 
         line.append(articles)
         submission.writerow(line)
 
     submission_file.close()
 
-
+def torch_saver(model,)
 if __name__ == '__main__':
+    start_time = time.time()
+    print(torch.cuda.is_available())
+    '''
+    images_dir = '~/data/images__all/'
+    transactions_dir = '~/data/transactions_train.csv'
+    cutomers_dir = '~/data/customers.csv'
+    predictions_dir='~/data/submission.csv'
+    '''
+    images_dir = './data/images/images_test/'
+    transactions_dir = './data/transactions_train_10.csv'
+    customers_dir = './data/customers_10.csv'
+    predictions_dir='./data/submission_10.csv'
     batch_size = 16
-    num_articles = len(os.listdir('~/data/images__all/')) #105100
+    num_recomm = 6
+    num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
-    dataset = ArticlesDataset(images_dir = '~/data/images__all/',transactions_dir = '~/data/transactions_train.csv',transform=myTransform)
+    dataset = ArticlesDataset(images_dir = images_dir,transactions_dir = transactions_dir,transform=myTransform)
+    print("dataset : --- %s seconds ---" % (time.time() - start_time))
     training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 0)
-    model = Model()
-    trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,batch_size = 16,rate = 1e-2)
-    predictions(model,tr_dir='~/data/transactions_train.csv',cust_dir='~/data/customers.csv',pred_dir='~/data/submission.csv',images_dir='~/data/images__all/',num_articles=num_articles,transform=myTransform)
+    model = Model(num_articles=num_articles)
+    if(torch.cuda.is_available()):
+        model.cuda()
+    trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2)
+    print("training : --- %s seconds ---" % (time.time() - start_time))
+    predictions(model,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
+    print("making predictions : --- %s seconds ---" % (time.time() - start_time))
