@@ -271,6 +271,18 @@ def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_article
         submission.writerow(line)
 
     submission_file.close()
+    
+def lossPlot(loss):
+    plt.plot(loss,label = "loss for training set")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.savefig("./loss_curves.png")
+    
+    file = open("./loss.txt", "w")
+    for element in loss:
+        file.write(element + "\n")
+    file.close()
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -296,6 +308,8 @@ if __name__ == '__main__':
     if(torch.cuda.is_available()):
         model.cuda()
     train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2, train_period = 1)
+    
+    
     torch.save(model.state_dict(), "model.pt")
     print("training : --- %s seconds ---" % (time.time() - start_time))
 
