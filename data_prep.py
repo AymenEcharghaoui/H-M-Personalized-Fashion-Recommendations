@@ -174,13 +174,18 @@ class Model(torch.nn.Module):
         z = self.dense6(z)
         return z
 
-def trainer(training_generator,model,loss_fn,epoch,rate) :
-    optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4)
+
+def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
+    optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4,)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    train_loss = []
 
-    for _ in range(epoch):
-        for sample_batched in training_generator:
+    for i in range(epoch):
+        running_loss = 0.0
+        total = 0
+        for j, sample_batched in enumerate(training_generator):
             x,y = sample_batched
             x = x.to(device)
             y = y.to(device)
@@ -189,6 +194,18 @@ def trainer(training_generator,model,loss_fn,epoch,rate) :
             loss = loss_fn(y_pred, y)
             loss.backward()
             optimizer.step()
+            
+            total += y.size(0)
+            running_loss += loss.item() * y.size(0)
+            
+            if j % train_period == train_period-1:
+                print('epoch:%d, period:%d running loss: %.3f' %(i + 1, j + 1, loss.item()))
+        
+        running_loss = running_loss/total
+        print('epoch:%d average loss: %.3f' %(i + 1, running_loss))
+        train_loss.append(running_loss)
+        
+    return train_loss
 
 def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform=None) :
     """
@@ -278,7 +295,7 @@ if __name__ == '__main__':
     model = Model(num_articles=num_articles)
     if(torch.cuda.is_available()):
         model.cuda()
-    trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2)
+    train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 5,rate = 1e-2, train_period = 1)
     torch.save(model.state_dict(), "model.pt")
     print("training : --- %s seconds ---" % (time.time() - start_time))
 
