@@ -10,11 +10,6 @@ from torchvision import transforms, utils
 import random
 import time
 
-# Ignore warnings
-import warnings
-warnings.filterwarnings("ignore")
-
-
 
 
 class ArticlesDataset(Dataset):
@@ -177,9 +172,14 @@ def trainer(training_generator,model,loss_fn,epoch,rate) :
     optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    train_period = 1
+    train_loss = []
 
-    for _ in range(epoch):
-        for sample_batched in training_generator:
+    for i in range(epoch):
+        running_loss = 0.0
+        total = 0
+        for j, sample_batched in enumerate(training_generator):
             x,y = sample_batched
             x = x.to(device)
             y = y.to(device)
@@ -188,6 +188,17 @@ def trainer(training_generator,model,loss_fn,epoch,rate) :
             loss = loss_fn(y_pred, y)
             loss.backward()
             optimizer.step()
+            
+            total += y.size(0)
+            running_loss += loss.item() * y.size(0)
+            
+            if j % train_period == train_period-1:
+                print('[%d, %5d] loss: %.3f' %(i + 1, j + 1, loss.item()))
+        
+        train_loss.append(running_loss / total)
+        
+    return train_loss
+        
 
 def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_articles,transform=None) :
     """
@@ -207,7 +218,7 @@ def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_article
     # all customers : there are new customers in customers.csv
     customers = pd.read_csv(cust_dir)
     for i,row in customers.iterrows():
-        recommandations[row['customer_id']] = torch.zeros(num_articles,dtype=torch.float32)
+        recommandations[row['customer_id']] = torch.zeros(num_articles,device=device, dtype=torch.float32)
 
     # making recommandations based on previous transactions
     transactions = pd.read_csv(tr_dir)
@@ -251,7 +262,6 @@ def predictions(model,num_reccom,tr_dir,cust_dir,pred_dir,images_dir,num_article
 
     submission_file.close()
 
-def torch_saver(model,)
 if __name__ == '__main__':
     start_time = time.time()
     print(torch.cuda.is_available())
