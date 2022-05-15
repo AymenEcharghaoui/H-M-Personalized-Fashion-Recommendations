@@ -1,8 +1,8 @@
 import pandas as pd
 import datetime
 
-dir_tr = ""
-transactions = pd.read_csv(dir_tr,dtype={'article_id':str})
+transactions_dir = '/home/aymen/data/transactions_train.csv'
+transactions = pd.read_csv(transactions_dir,dtype={'article_id':str})
 transactions['t_dat'] = transactions['t_dat'].to_datetime()
 
 print("all transactions from {} to {}".format(transactions['t_dat'].min(),transactions['t_dat'].max()))
