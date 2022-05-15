@@ -3,7 +3,7 @@ import datetime
 
 transactions_dir = '/home/aymen/data/transactions_train.csv'
 transactions = pd.read_csv(transactions_dir,dtype={'article_id':str})
-transactions['t_dat'] = transactions['t_dat'].to_datetime()
+transactions['t_dat'] = pd.to_datetime(transactions['t_dat'])
 
 print("all transactions from {} to {}".format(transactions['t_dat'].min(),transactions['t_dat'].max()))
 
