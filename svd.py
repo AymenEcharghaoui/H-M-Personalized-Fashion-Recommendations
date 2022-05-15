@@ -7,7 +7,7 @@ transactions['t_dat'] = pd.to_datetime(transactions['t_dat'])
 
 print("all transactions from {} to {}".format(transactions['t_dat'].min(),transactions['t_dat'].max()))
 
-transactions_train = transactions.loc[(transactions['t_dat']<datetime.datetime(2020,9,16) and transactions['t_dat']>= datetime.datetime(2020,9,8))]
+transactions_train = transactions.loc[(transactions['t_dat']<datetime.datetime(2020,9,16) & transactions['t_dat']>= datetime.datetime(2020,9,8))]
 
 transactions_val = transactions.loc[(transactions['t_dat']>=datetime.datetime(2020,9,16))]
 
