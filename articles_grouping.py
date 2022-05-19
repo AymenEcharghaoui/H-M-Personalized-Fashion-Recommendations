@@ -8,7 +8,7 @@ groups = list(df['product_group_name'].unique())
 print((groups[0][0]))
 
 
-for i in range(groups):
+for i in range(len(groups)):
     if(groups[i]  != 'Underwear/nightwear'):
         groups[i] = groups[i].replace("'","").replace(" ","_")
         os.mkdir('/home/aymen/data/'+groups[i])
