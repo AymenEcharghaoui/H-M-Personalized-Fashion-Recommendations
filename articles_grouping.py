@@ -5,7 +5,7 @@ import os
 df = pd.read_csv('/home/aymen/data/articles.csv',dtype={'article_id':str,'product_group_name':str})
 
 groups = list(df['product_group_name'].unique())
-print(type(groups[0]))
+print((groups[0][0]))
 
 '''
 for group in groups:
