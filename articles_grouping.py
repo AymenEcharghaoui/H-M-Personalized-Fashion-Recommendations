@@ -10,4 +10,4 @@ for group in groups:
     os.mkdir('/home/aymen/data/'+group)
 
 for i,row in df.iterrows():
-    os.replace('/home/aymen/data/images_all/'+row['article_id'],'/home/aymen/data/'+row['product_group_name']+'/'+row['article_id'])
+    os.replace('/home/aymen/data/images_all/'+row['article_id']+'.jpg','/home/aymen/data/'+row['product_group_name']+'/'+row['article_id']+'.jpg')
