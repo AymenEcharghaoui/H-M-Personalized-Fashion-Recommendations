@@ -11,7 +11,8 @@ print((groups[0][0]))
 for i in range(len(groups)):
     if(groups[i]  != 'Underwear/nightwear'):
         groups[i] = groups[i].replace("&","and").replace(" ","_")
-        os.mkdir('/home/aymen/data/'+groups[i])
+        if(not os.path.exists('/home/aymen/data/'+groups[i])):
+            os.mkdir('/home/aymen/data/'+groups[i])
 
 for i,row in df.iterrows():
     if row['product_group_name']!= 'Underwear/nightwear':
