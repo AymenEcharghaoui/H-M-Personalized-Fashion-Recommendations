@@ -153,14 +153,14 @@ class ToTensor(object):
 
 class Model(torch.nn.Module):
 
-    def __init__(self,num_articles,activation = torch.nn.ReLU()) :
+    def __init__(self,group_length,activation = torch.nn.ReLU()) :
         super().__init__()
         self.conv1 = torch.nn.Conv2d(3,6,kernel_size=3,stride=1,padding=1)
         self.pool2 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
         self.conv3 = torch.nn.Conv2d(6,16,kernel_size=3,stride=1,padding=1)
         self.pool4 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
-        self.dense5 = torch.nn.Linear(16*56*56,int(num_articles/2))
-        self.dense6 = torch.nn.Linear(int(num_articles/2),num_articles)
+        self.dense5 = torch.nn.Linear(16*56*56,int(group_length/2))
+        self.dense6 = torch.nn.Linear(int(group_length/2),group_length)
         self.activation = activation
 
     def forward(self,x) :
@@ -172,6 +172,7 @@ class Model(torch.nn.Module):
         z = self.dense5(z)
         z = self.activation(z)
         z = self.dense6(z)
+
         return z
 
 
@@ -206,16 +207,56 @@ def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
         train_loss.append(running_loss)
         
     return train_loss
-def score(model,images_dir,num_articles,tr_dir,num_recomm=12,transform=None):
+def score(tr_dir,pred_dir,num_recomm=12):
     """
-    return MAP@12
+    return MAP@12 over the test dataset
+    Args : 
+        tr_dir (string): directory of transactions_train_test.csv
+        pred_dir (string): Directory of the submission file
     """
+    # build from transactions_test
+    df =  pd.read_csv(tr_dir,dtype={'customer_id':str,'article_id':str})
+    transactions = {}
+    # put all customers
+    for i,row in df.iterrows():
+        transactions[row['customer_id']] = set()
+    # put all transactions
+    for i,row in df.iterrows():
+        customer = row['customer_id']
+        article = row['article_id']
+        transactions[customer].add(article)
+    # computing MAP@12
 
-def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_reccom=12,transform=None) :
+    map12 = 0
+    subm = open(pred_dir)
+    subm_reader = csv.reader(subm)
+    next(subm_reader)
+    count_customers = 0
+    for row in subm_reader:
+        count_customers += 1
+        # going through all customers
+        average_precision = 0
+        reccomandations = row[1].split()
+        customer_id = row[0]
+        relevant = 0
+        for i in range(num_recomm):
+            if(reccomandations[i] in transactions[customer_id]):
+                relevant += 1
+                average_precision += relevant/(i+1)
+        average_precision /= min(12,len(transactions[customer_id]))
+        map12 += average_precision
+    map12 /= count_customers
+    return map12
+
+
+def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_reccom=12,transform=None) :
     """
     store a sample submission csv file in pred_dir
     Args :
-        model : DL model after being trained on the whole dataset
+        models : DL models for each group of articles after being trained on the whole dataset
+        id2group (dict): article_id -> (group_index,index in group) 
+        group2id (dict): (group_index,index in group) -> article_id
+        group_sizes (list): group_index -> size of this group
         tr_dir (string): directory of transactions_train.csv
         cust_dir (string): directory of customers.csv
         pred_dir (string): directory of the submission file
@@ -223,6 +264,14 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_recco
         num_articles (int): total number of articles
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    group_sizes_cumm = []
+    start = 0
+    for size in group_sizes:
+        start += size
+        group_sizes_cumm.append(start)
+
+    assert group_sizes_cumm[-1] == num_articles
 
     recommandations = {}
     is_active = {}
@@ -241,12 +290,18 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_recco
 
         is_active[row['customer_id']] = True
         image_id = row['article_id']
+        group_index = id2group[image_id][0]
+        index_in_group = group2id[image_id][1]
         img_name = os.path.join(images_dir,'0'+str(image_id)+'.jpg')
         image = io.imread(img_name)
         if transform:
             image = transform(image)
         image = image.to(device)
-        recommandations[row['customer_id']] += model(image.unsqueeze(0)).squeeze(0).to('cpu')
+        #start = sum(group_sizes[:id2group[image_id][0]])
+        #end = start + group_sizes[id2group[image_id][0]]
+        end = group_sizes_cumm[id2group[image_id][0]]
+        start = end - group_sizes[id2group[image_id][0]]
+        recommandations[row['customer_id']][start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
 
     submission_file = open(pred_dir,'w')
     # no worries of a second execution : we overwrite what's already existing in the submission file
@@ -267,23 +322,37 @@ def predictions(model,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_recco
             articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]
         else:
             indices = reccs.topk(num_reccom).indices
+            '''
             for i in range(num_reccom-1):
                 articles += os.listdir(images_dir)[indices[i]][:-4]+ " "
             articles += os.listdir(images_dir)[indices[num_reccom-1]][:-4]
+            '''
+            for i in range(num_reccom):
+                index = indices[i]
+                j = 0
+                while(index<=group_sizes_cumm[j]):
+                    j += 1
+                # image in group j
+                if(j>0):
+                    index -= group_sizes_cumm[j-1]
+                # image index in group j is index
+                articles += group2id[(j,index)]+ " "
+            articles  = articles[:-1]
 
         line.append(articles)
         submission.writerow(line)
 
     submission_file.close()
+
     
-def lossPlot(loss,dir):
+def lossPlot(loss,dir,i):
     plt.plot(loss,label = "loss for training set")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.legend()
-    plt.savefig(dir+"loss_curves.png")
+    plt.savefig(dir+"loss_curves_"+str(i)+".png")
     
-    file = open(dir+"loss.txt", "w")
+    file = open(dir+"loss"+str(i)+".txt", "w")
     for element in loss:
         file.write(str(element) + "\n")
     file.close()
@@ -291,41 +360,52 @@ def lossPlot(loss,dir):
 if __name__ == '__main__':
     start_time = time.time()
     print(torch.cuda.is_available())
-
+    '''
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
     transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
     transactions_dir_test = '/home/aymen/data/transactions_train_test.csv'
     customers_dir = '/home/aymen/data/customers.csv'
     predictions_dir='/home/aymen/data/submission.csv'
+    model_submit_dir = '/home/aymen/data/model.pt'
+    loss_dir = '/home/aymen/data/'
     '''
     images_dir = './data/images/images_test/'
     transactions_dir_train = './data/transactions_train_10.csv'
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
-    '''
-    model_submit_dir = '/home/aymen/data/model.pt'
-    loss_dir = '/home/aymen/data/'
-    batch_size = 64
+    loss_dir = './data/'
+
+    num_groups = 10
+    batch_size = 16
     train_period = 10
-    num_recomm = 12
+    num_recomm = 6
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
-    dataset = ArticlesDataset(images_dir = images_dir,transactions_dir = transactions_dir_train,transform=myTransform)
-    print("dataset : --- %s seconds ---" % (time.time() - start_time))
-    training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 0)
-    model = Model(num_articles=num_articles)
-    if(torch.cuda.is_available()):
-        model.cuda()
-    train_loss = trainer(training_generator,model,torch.nn.CrossEntropyLoss(),epoch = 10,rate = 1e-3, train_period=train_period)
-    torch.save(model.state_dict(), model_submit_dir)
-    lossPlot(train_loss,loss_dir)
-    print("training : --- %s seconds ---" % (time.time() - start_time))
+    models = []
+    for i in range(num_groups):
+
+        model_submit_dir = './data/model'+str(i)+'.pt'
+
+
+        dataset = ArticlesDataset(index_group=i,images_dir = images_dir,transactions_dir = transactions_dir_train,transform=myTransform)
+        print("dataset "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
+        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 0)
+        model = Model(group_length=dataset.length)
+        if(torch.cuda.is_available()):
+            model.cuda()
+        train_loss = trainer(training_generator,model,torch.nn.BCEWithLogitsLoss(),epoch = 10,rate = 1e-3, train_period=train_period)
+        torch.save(model.state_dict(), model_submit_dir)
+        lossPlot(train_loss,loss_dir,i)
+        print("training "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
+        model.to(torch.device('cpu'))
+        models.append(model)
 
     '''
     model0 = Model(num_articles=num_articles)
     model0.load_state_dict(torch.load("model.pt"))
     model0.eval()
     '''
-    predictions(model,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
+    predictions(models,id2group=,group2id=,group_sizes= ,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
+    map12 = score(tr_dir=transactions_dir_train,pred_dir=predictions_dir,num_recomm=num_recomm)
