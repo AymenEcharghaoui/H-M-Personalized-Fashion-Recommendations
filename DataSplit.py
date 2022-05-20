@@ -27,7 +27,7 @@ def dataHead(dataAdress, usecols, head):
     return df
     
 if __name__ == '__main__':
-    dataAdress = "./data/transactions_train.csv"
+    dataAdress = "~/data/transactions_train.csv"
     # df = pd.read_csv(dataAdress)
     # print(df.iloc[-1])
     '''
