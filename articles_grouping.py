@@ -17,7 +17,7 @@ for i in range(len(groups)):
 for i,row in df.iterrows():
     if row['product_group_name']!= 'Underwear/nightwear':
         row['product_group_name'] = row['product_group_name'].replace("&","and").replace(" ","_")
-        os.replace('/home/aymen/data/images_all/'+str(row['article_id'])+'.jpg','/home/aymen/data/'+row['product_group_name']+'/'+row['article_id']+'.jpg')
+        os.rename('/home/aymen/data/images_all/'+str(row['article_id'])+'.jpg','/home/aymen/data/'+row['product_group_name']+'/'+row['article_id']+'.jpg')
     else:
-        os.replace('/home/aymen/data/images_all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Underwear/'+row['article_id']+'.jpg')
-        os.replace('/home/aymen/data/images_all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Nightwear/'+row['article_id']+'.jpg')
+        os.rename('/home/aymen/data/images_all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Underwear/'+row['article_id']+'.jpg')
+        os.rename('/home/aymen/data/images_all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Nightwear/'+row['article_id']+'.jpg')
