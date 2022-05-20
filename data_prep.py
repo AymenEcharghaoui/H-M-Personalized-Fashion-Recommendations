@@ -6,79 +6,155 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+from torchvision import transforms
 import random
 import time
 import cloudpickle as pickle
 
 # Ignore warnings
-import warnings
-warnings.filterwarnings("ignore")
+# import warnings
+# warnings.filterwarnings("ignore")
 
 
+def creatDataset(images_dir, articles_dir,transactions_dir, transform=None):
+    """
+    Group the articles by [4 groups of Garment Upper body: [Sweater:9302,
+    T-shirt and Vest top:7904+2991, Top and Blouse and Jacket:4155+3979+3940, 
+    rest:3405+2356+1550+1110+913+460+449+154+73], 2 groups of Garment Lower body:
+    [Trousers:11169, rest:3939+2696+1878+130], Garment Full body:13292, 
+    Accessories:11158, Shoes and Socks & Tights and Nightwear:5283+2442+1899, 
+    rest:5490+3127+121+54+49+25+17+13+9+5+3+2]
 
+    Parameters
+    ----------
+    images_dir : str
+        Directory with all the images.
+    articles_dir : str
+        Directory of the articles csv file.
+    transactions_dir : str
+        Directory of the transactions csv file.
+    transform : callable, optional
+        Optional transform to be applied on a sample.
+
+    Returns
+    -------
+    id2group: dic {article_id: (group_id, id_in_group)}
+    group2id: dic {(group_id, id_in_group): article_id}
+    group_sizes: list of group size(#Ai)
+    datasets: list of dataset
+    """
+    
+    # creat transactions dictionary {customer: a set of all article he has bought}
+    transactions_df = pd.read_csv(transactions_dir, usecols=['customer_id','article_id'], dtype={'article_id':str})
+    
+    transactions = {}
+    for i,row in transactions_df.iterrows():
+        customer = row['customer_id']
+        article = row['article_id']
+        if customer not in transactions:
+            transactions[customer] = {article}
+        else:
+            transactions[customer].add(article)
+            
+    # creat group2id dir and id2group and group_sizes
+    (group2id,id2group,group_sizes) = creatArticlesDic(articles_dir)
+    
+    # creat relevant dir {article: a set of all articles(1d2group[article]) relevant to it}
+    relevant = {}
+    id_relevant = []
+    for customer in transactions:
+        for p_article in transactions[customer]:
+            for article in transactions[customer]:
+                if p_article != article:
+                    if p_article not in relevant:
+                        relevant[p_article] = {id2group[article]}
+                        id_relevant.append(p_article)
+                    else:
+                        relevant[p_article].add(id2group[article])
+    # creat datasets
+    datasets = [] #list of datasets
+    for i in range(len(group_sizes)):
+        datasets.append(ArticlesDataset(i,images_dir,group_sizes[i],relevant,id_relevant,transform=transform))
+        
+    return (group2id,id2group,group_sizes,datasets)
+
+def creatArticlesDic(articles_dir):
+    articles_df = pd.read_csv(articles_dir, usecols=['article_id','product_type_name','product_group_name'], dtype={'article_id':str})
+    
+    group_sizes = [0]*10 #list of group sizes(#Ai)
+    
+    group2id = {}
+    id2group = {}
+    for i,row in articles_df.iterrows():
+        article = row['article_id']
+        
+        if row['product_group_name'] == 'Garment Upper body':
+            if row['product_type_name'] == 'Sweater':
+                group_id = 0
+            elif row['product_type_name'] == 'T-shirt' or \
+                row['product_type_name'] == 'Vest top':
+                group_id = 1
+            elif row['product_type_name'] == 'Top' or \
+                row['product_type_name'] == 'Blouse' or \
+                row['product_type_name'] == 'Jacket':
+                group_id = 2
+            else:
+                group_id = 3
+        
+        elif row['product_group_name'] == 'Garment Lower body':
+            if row['product_type_name'] == 'Trousers':
+                group_id = 4
+            else:
+                group_id = 5
+                
+        
+        elif row['product_group_name'] == 'Garment Full body':
+            group_id = 6
+        
+        elif row['product_group_name'] == 'Accessories':
+            group_id = 7
+        
+        elif row['product_group_name'] == 'Shoes' or \
+            row['product_group_name'] == 'Socks & Tights' or \
+            row['product_group_name'] == 'Nightwear':
+            group_id = 8
+            
+        else:
+            group_id = 9
+        
+        id2group[article] = (group_id,group_sizes[group_id])
+        group2id[(group_id,group_sizes[group_id])] = article
+        group_sizes[group_id] += 1
+        
+    return (group2id,id2group,group_sizes)
 
 class ArticlesDataset(Dataset):
 
-    def __init__(self, images_dir, transactions_dir, transform=None):
-        """
-        Args:
-            images_dir (string): Directory with all the images.
-            transactions_dir (string): Directory of the transactions csv file.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
+    def __init__(self, group_id, images_dir, group_size, relevant, id_relevant, transform=None):
+        self.group_id = group_id
         self.images_dir = images_dir
+        self.group_size = group_size
+        self.relevant = relevant
+        self.id_relevant = id_relevant
         self.transform = transform
-        df =  pd.read_csv(transactions_dir)
-        transactions = {}
-
-        # build relevant articles for each image
-        # put all customers
-        for i,row in df.iterrows():
-            transactions[row['customer_id']] = set()
-
-        # put all transactions
-        for i,row in df.iterrows():
-            customer = row['customer_id']
-            article = row['article_id']
-            transactions[customer].add(article)
-
-        # get all relevant articles for each p_article
-        self.relevant = {}
-
-        # put all articles
-        for i,row in df.iterrows():
-            self.relevant[row['article_id']] = set()
-
-        # populate --relevant
-        for customer in transactions:
-            for p_article in transactions[customer]:
-                for article in transactions[customer]:
-                    if(article != p_article):
-                        self.relevant[p_article].add(article)
-
-        # build an index of all image files
-        self.index = {}
-        i = 0
-        for image in os.listdir(self.images_dir):
-            self.index[int(image[:-4])] = i
-            i += 1
+        
+        self.length = len(id_relevant)
 
     def __len__(self):
-        return len(os.listdir(self.images_dir))
+        return self.length
 
     def __getitem__(self, idx):
 
-        article_id = os.listdir(self.images_dir)[idx]
-        img_name = os.path.join(self.images_dir,article_id)
+        article_id = self.id_relevant[idx]
+        img_name = os.path.join(self.images_dir,article_id+'.jpg')
         image = io.imread(img_name)
 
-        label_images = self.relevant[int(article_id[:-4])]
-        label = torch.zeros(len(self.index),dtype=torch.float32)
+        label_images = self.relevant[article_id]
+        label = torch.zeros(self.group_size, dtype=torch.float32)
 
-        for article in label_images:
-            label[self.index[article]] = 1/len(label_images)
+        for (group_id, id_in_group) in label_images:
+            if(group_id == self.group_id):
+                label[id_in_group] = 1
         
         if self.transform:
             return (self.transform(image),label)
@@ -291,7 +367,6 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
         is_active[row['customer_id']] = True
         image_id = row['article_id']
         group_index = id2group[image_id][0]
-        index_in_group = group2id[image_id][1]
         img_name = os.path.join(images_dir,'0'+str(image_id)+'.jpg')
         image = io.imread(img_name)
         if transform:
@@ -359,19 +434,20 @@ def lossPlot(loss,dir,i):
 
 if __name__ == '__main__':
     start_time = time.time()
-    print(torch.cuda.is_available())
+    print('Is cuda available?', torch.cuda.is_available())
     '''
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
     transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
     transactions_dir_test = '/home/aymen/data/transactions_train_test.csv'
+    articles_dir = !!!fill this
     customers_dir = '/home/aymen/data/customers.csv'
     predictions_dir='/home/aymen/data/submission.csv'
-    model_submit_dir = '/home/aymen/data/model.pt'
     loss_dir = '/home/aymen/data/'
     '''
     images_dir = './data/images/images_test/'
     transactions_dir_train = './data/transactions_train_10.csv'
+    articles_dir = './data/articles.csv'
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
     loss_dir = './data/'
@@ -382,15 +458,17 @@ if __name__ == '__main__':
     num_recomm = 6
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
+    
+    (group2id,id2group,group_sizes,datasets) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    
     models = []
     for i in range(num_groups):
 
         model_submit_dir = './data/model'+str(i)+'.pt'
 
-
-        dataset = ArticlesDataset(index_group=i,images_dir = images_dir,transactions_dir = transactions_dir_train,transform=myTransform)
+        dataset = datasets[i]
         print("dataset "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
-        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 0)
+        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 2)
         model = Model(group_length=dataset.length)
         if(torch.cuda.is_available()):
             model.cuda()
@@ -406,6 +484,15 @@ if __name__ == '__main__':
     model0.load_state_dict(torch.load("model.pt"))
     model0.eval()
     '''
-    predictions(models,id2group=,group2id=,group_sizes= ,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
+    predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
     map12 = score(tr_dir=transactions_dir_train,pred_dir=predictions_dir,num_recomm=num_recomm)
+    
+# ======Biao's test=========
+# (group2id,id2group,group_sizes,datasets) = creatDataset('./data/images/images_test/', './data/articles.csv', './data/transactions_train_10.csv', transform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()]))
+# print(group_sizes)
+# print(datasets[0][0][1])
+
+# (group2id,id2group,group_sizes) = creatArticlesDic('./data/articles.csv')
+# print(group_sizes)
+# print(id2group)

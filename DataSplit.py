@@ -8,7 +8,7 @@ Created on Fri May 13 13:46:51 2022
 import pandas as pd
 
 def dataSplit(dataAdress, usecols, date):
-    df = pd.read_csv(dataAdress, usecols=usecols)
+    df = pd.read_csv(dataAdress, usecols=usecols, dtype={'article_id':str})
     index = df[df['t_dat'] == date].index.tolist()[0]
     df_train = df.iloc[:index]
     file_name = dataAdress[:-4] + '_train.csv'
@@ -20,14 +20,14 @@ def dataSplit(dataAdress, usecols, date):
     return (df_train, df_test)
     
 def dataHead(dataAdress, usecols, head):
-    df = pd.read_csv(dataAdress, usecols=usecols, nrows=head)
+    df = pd.read_csv(dataAdress, usecols=usecols, nrows=head, dtype={'article_id':str})
     file_name = dataAdress[:-4] + '_' + str(head) + '.csv'
     df.to_csv(file_name)
     
     return df
     
 if __name__ == '__main__':
-    dataAdress = "~/data/transactions_train.csv"
+    dataAdress = "./data/transactions_train.csv"
     # df = pd.read_csv(dataAdress)
     # print(df.iloc[-1])
     '''
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     usecols=['t_dat','customer_id','article_id']
     dataSplit(dataAdress, usecols, '2020-09-16')
     
-    # dataHead(dataAdress, usecols, head=10)
+    #dataHead(dataAdress, usecols, head=10)
     
-    # dataHead("./data/customers.csv", None, 10)
+    #dataHead("./data/customers.csv", None, 10)
     
