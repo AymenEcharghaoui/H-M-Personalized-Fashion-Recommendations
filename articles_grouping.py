@@ -18,7 +18,9 @@ for i in range(len(groups)):
 for i,row in df.iterrows():
     if row['product_group_name']!= 'Underwear/nightwear':
         row['product_group_name'] = row['product_group_name'].replace("&","and").replace(" ","_")
-        os.replace('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/'+row['product_group_name']+'/'+row['article_id']+'.jpg')
+        if(os.path.exists('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg')):
+            os.replace('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/'+row['product_group_name']+'/'+row['article_id']+'.jpg')
     else:
-        shutil.copy('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Underwear/'+row['article_id']+'.jpg')
-        os.replace('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Nightwear/'+row['article_id']+'.jpg')
+        if(os.path.exists('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg')):
+            shutil.copy('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Underwear/'+row['article_id']+'.jpg')
+            os.replace('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Nightwear/'+row['article_id']+'.jpg')
