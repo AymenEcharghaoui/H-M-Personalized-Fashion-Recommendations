@@ -40,7 +40,7 @@ if __name__ == '__main__':
     '''
     
     usecols=['t_dat','customer_id','article_id']
-    dataSplit(dataAdress, usecols, '2020-09-15')
+    dataSplit(dataAdress, usecols, '2020-09-16')
     
     # dataHead(dataAdress, usecols, head=10)
     
