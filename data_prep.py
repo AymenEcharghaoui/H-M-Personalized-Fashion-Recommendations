@@ -432,17 +432,22 @@ def lossPlot(loss,dir,i):
         file.write(str(element) + "\n")
     file.close()
 
+def init_weights_xavier_uniform(m):
+    if type(m) == torch.nn.Linear:
+      torch.nn.init.xavier_uniform_(m.weight)
+
+
 if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
-    '''
+    
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
     transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
     transactions_dir_test = '/home/aymen/data/transactions_train_test.csv'
-    articles_dir = !!!fill this
+    articles_dir = '/home/aymen/data/articles.csv'
     customers_dir = '/home/aymen/data/customers.csv'
-    predictions_dir='/home/aymen/data/submission.csv'
+    predictions_dir = '/home/aymen/data/submission.csv'
     loss_dir = '/home/aymen/data/'
     '''
     images_dir = './data/images/images_test/'
@@ -451,32 +456,37 @@ if __name__ == '__main__':
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
     loss_dir = './data/'
-
-    num_groups = 10
-    batch_size = 16
+    '''
+    
+    batch_size = 64
+    epoch = 10
+    rate = 1e-3
     train_period = 10
-    num_recomm = 6
+    num_recomm = 12
+    
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
     (group2id,id2group,group_sizes,datasets) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
     
     models = []
-    for i in range(num_groups):
+    for i in range(len(group_sizes)):
 
         model_submit_dir = './data/model'+str(i)+'.pt'
 
         dataset = datasets[i]
         print("dataset "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
         training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 2)
-        model = Model(group_length=dataset.length)
+        model = Model(group_length=group_sizes[i])
+        model.apply(init_weights_xavier_uniform)
         if(torch.cuda.is_available()):
             model.cuda()
-        train_loss = trainer(training_generator,model,torch.nn.BCEWithLogitsLoss(),epoch = 10,rate = 1e-3, train_period=train_period)
+        train_loss = trainer(training_generator,model,torch.nn.BCEWithLogitsLoss(),epoch=epoch,rate=rate, train_period=train_period)
         torch.save(model.state_dict(), model_submit_dir)
         lossPlot(train_loss,loss_dir,i)
         print("training "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
         model.to(torch.device('cpu'))
+        torch.cuda.empty_cache()
         models.append(model)
 
     '''
@@ -487,11 +497,11 @@ if __name__ == '__main__':
     predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
     map12 = score(tr_dir=transactions_dir_train,pred_dir=predictions_dir,num_recomm=num_recomm)
-    
+    print("map12 score is",map12)
+
 # ======Biao's test=========
 # (group2id,id2group,group_sizes,datasets) = creatDataset('./data/images/images_test/', './data/articles.csv', './data/transactions_train_10.csv', transform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()]))
-# print(group_sizes)
-# print(datasets[0][0][1])
+# print(datasets[0][0][0][1][11][11])
 
 # (group2id,id2group,group_sizes) = creatArticlesDic('./data/articles.csv')
 # print(group_sizes)
