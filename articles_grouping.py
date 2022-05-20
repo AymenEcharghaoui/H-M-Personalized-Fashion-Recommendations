@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import shutil
 
 
 df = pd.read_csv('/home/aymen/data/articles.csv',dtype={'article_id':str,'product_group_name':str})
@@ -19,5 +20,5 @@ for i,row in df.iterrows():
         row['product_group_name'] = row['product_group_name'].replace("&","and").replace(" ","_")
         os.replace('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/'+row['product_group_name']+'/'+row['article_id']+'.jpg')
     else:
-        os.replace('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Underwear/'+row['article_id']+'.jpg')
+        shutil.copy('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Underwear/'+row['article_id']+'.jpg')
         os.replace('/home/aymen/data/images__all/'+str(row['article_id'])+'.jpg','/home/aymen/data/Nightwear/'+row['article_id']+'.jpg')
