@@ -251,7 +251,7 @@ class Model(torch.nn.Module):
 def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_period,id2group,group2id,group_sizes,\
     tr_train_dir,cust_dir,pred_dir,images_dir,num_articles,num_reccom,transform,tr_valid_dir=None):
 
-    training_generators = [DataLoader(train_datasets[i], batch_size = batch_size,shuffle = True, num_workers = 2) for i in range(len(group_sizes))]
+    training_generators = [DataLoader(train_datasets[i], batch_size = batch_size,shuffle = True, num_workers = 1) for i in range(len(group_sizes))]
     optimizers = [torch.optim.Adam(params=models[i].parameters(),lr=rate,weight_decay=1e-4) for i in range(len(group_sizes))]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -488,7 +488,7 @@ if __name__ == '__main__':
     print('Is cuda available?', torch.cuda.is_available())
     
 
-    '''
+    
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
     transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
@@ -497,9 +497,9 @@ if __name__ == '__main__':
     customers_dir = '/home/aymen/data/customers.csv'
     predictions_dir = '/home/aymen/data/submission.csv'
     graph_dir = '/home/aymen/data/'
+    
+    
     '''
-    
-    
     images_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/images/images_test/'
     transactions_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/transactions_train_20.csv'
     transactions_dir_train = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/transactions_train_20.csv'
@@ -508,7 +508,7 @@ if __name__ == '__main__':
     customers_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/customers_20.csv'
     predictions_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/submission.csv'
     graph_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/'
-    
+    '''
     
     batch_size = 64
     max_epoch = 10
