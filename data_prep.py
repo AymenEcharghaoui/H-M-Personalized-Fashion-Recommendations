@@ -59,18 +59,22 @@ def creatDataset(images_dir, articles_dir,transactions_dir, transform=None):
     # creat group2id dir and id2group and group_sizes
     (group2id,id2group,group_sizes) = creatArticlesDic(articles_dir)
     
+    # creat a set of all articles_id with image
+    images_set = set([image[:-4] for image in os.listdir(images_dir)])
+    
     # creat relevant dir {article: a set of all articles(1d2group[article]) relevant to it}
     relevant = {}
     id_relevant = []
     for customer in transactions:
         for p_article in transactions[customer]:
-            for article in transactions[customer]:
-                if p_article != article:
-                    if p_article not in relevant:
-                        relevant[p_article] = {id2group[article]}
-                        id_relevant.append(p_article)
-                    else:
-                        relevant[p_article].add(id2group[article])
+            if p_article in images_set:
+                for article in transactions[customer]:
+                    if p_article != article:
+                        if p_article not in relevant:
+                            relevant[p_article] = {id2group[article]}
+                            id_relevant.append(p_article)
+                        else:
+                            relevant[p_article].add(id2group[article])
     # creat datasets
     datasets = [] #list of datasets
     for i in range(len(group_sizes)):
@@ -440,7 +444,7 @@ def init_weights_xavier_uniform(m):
 if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
-    
+    '''
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
     transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
@@ -456,7 +460,7 @@ if __name__ == '__main__':
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
     loss_dir = './data/'
-    '''
+    
     
     batch_size = 64
     epoch = 10
@@ -468,6 +472,7 @@ if __name__ == '__main__':
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
     (group2id,id2group,group_sizes,datasets) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    print("creating dataset : --- %s seconds ---" % (time.time() - start_time))
     
     models = []
     for i in range(len(group_sizes)):
