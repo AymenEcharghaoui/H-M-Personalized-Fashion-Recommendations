@@ -257,17 +257,18 @@ def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_pe
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # size epoch * #Groups
-    train_loss = np.zeros((epoch,len(group_sizes)))
+    train_loss = np.zeros((max_epoch,len(group_sizes)))
     # size epoch
     train_map = []
     valid_map = []
 
-    for i in range(max_epoch):
+    i = 0
+    while(i < max_epoch):
         for j in range(len(group_sizes)):
             running_loss = 0.0
             total = 0
             models[j].to(device)
-            for j,sample_batched in enumerate(training_generators[j]):
+            for k,sample_batched in enumerate(training_generators[j]):
                 x,y = sample_batched
                 x = x.to(device)
                 y = y.to(device)
@@ -280,14 +281,14 @@ def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_pe
                 total += y.size(0)
                 running_loss += loss.item() * y.size(0)
                 
-                if j % train_period == train_period-1:
-                    print('epoch:%d, period:%d running loss: %.3f' %(i + 1, j + 1, loss.item()))
+                if k % train_period == train_period-1:
+                    print('epoch:%d, period:%d running loss: %.3f' %(i , k , loss.item()))
 
 
             models[j].to(torch.device('cpu'))
             torch.cuda.empty_cache()
             running_loss = running_loss/total
-            print('epoch:%d average loss: %.3f' %(i + 1, running_loss))
+            print('epoch:%d average loss: %.3f' %(i , running_loss))
             train_loss[i][j] = running_loss
 
         if(tr_valid_dir):
@@ -299,10 +300,11 @@ def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_pe
             predictions(models,id2group,group2id,group_sizes,tr_valid_dir,cust_dir,pred_valid_dir,images_dir,num_articles,num_reccom=num_reccom,transform=transform)
             valid_map.append(score(tr_valid_dir,pred_valid_dir,num_recomm))
 
-            if(i>=2 and valid_map[-1]<=valid_map[-2]):
+            if(i>=1 and valid_map[-1]<=valid_map[-2]):
                 break
+        i += 1
         
-    return train_loss,train_map,valid_map
+    return i,train_loss,train_map,valid_map
 
 def score(tr_dir,pred_dir,num_recomm=12):
     """
@@ -330,18 +332,19 @@ def score(tr_dir,pred_dir,num_recomm=12):
     next(subm_reader)
     count_customers = 0
     for row in subm_reader:
-        count_customers += 1
-        # going through all customers
-        average_precision = 0
-        reccomandations = row[1].split()
         customer_id = row[0]
-        relevant = 0
-        for i in range(num_recomm):
-            if(reccomandations[i] in transactions[customer_id]):
-                relevant += 1
-                average_precision += relevant/(i+1)
-        average_precision /= min(12,len(transactions[customer_id]))
-        map12 += average_precision
+        if(customer_id in transactions):
+            count_customers += 1
+            # going through all customers
+            average_precision = 0
+            reccomandations = row[1].split()
+            relevant = 0
+            for i in range(num_recomm):
+                if(reccomandations[i] in transactions[customer_id]):
+                    relevant += 1
+                    average_precision += relevant/(i+1)
+            average_precision /= min(12,len(transactions[customer_id]))
+            map12 += average_precision
     map12 /= count_customers
     return map12
 
@@ -402,7 +405,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
             recommandations[row['customer_id']][start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
             models[group_index].to(torch.device('cpu'))
 
-    submission_file = open(pred_dir,'w')
+    submission_file = open(pred_dir,'w',newline='')
     # no worries of a second execution : we overwrite what's already existing in the submission file
 
     submission = csv.writer(submission_file,delimiter=',')
@@ -417,8 +420,8 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
         if(not(is_active[row['customer_id']])):
             # new customer : generate num_reccom random articles
             for _ in range(num_reccom-1):
-                articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]+" "
-            articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]
+                articles += os.listdir(images_dir)[random.randint(0,num_articles-1)][:-4]+" "
+            articles += os.listdir(images_dir)[random.randint(0,num_articles-1)][:-4]
 
         else:
             indices = reccs.topk(num_reccom).indices
@@ -428,7 +431,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
             articles += os.listdir(images_dir)[indices[num_reccom-1]][:-4]
             '''
             for i in range(num_reccom):
-                index = indices[i]
+                index = indices[i].item()
                 j = 0
                 while(index>=group_sizes_cumm[j]):
                     j += 1
@@ -440,13 +443,14 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
             articles  = articles[:-1]
 
         line.append(articles)
-        submission.writerow(line)
+        submission.writerow(line,)
 
     submission_file.close()
   
-def lossPlot(loss,dir,i):
+def lossPlot(loss,dir,i,epoch):
     # per group
-    plt.plot(loss,label = "loss for training set")
+    plt.figure()
+    plt.plot(loss[:epoch+1],label = "loss for training set")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.legend()
@@ -457,10 +461,11 @@ def lossPlot(loss,dir,i):
         file.write(str(element) + "\n")
     file.close()
 
-def mapPlot(train_map,valid_map,graph_dir):
+def mapPlot(train_map,valid_map,graph_dir,epoch):
     # per epoch for all groups
-    plt.plot(train_map,label = "map@12 for training set")
-    plt.plot(valid_map,label = "map@12 for validating set")
+    plt.figure()
+    plt.plot(train_map[:epoch+1],label = "map@12 for training set")
+    plt.plot(valid_map[:epoch+1],label = "map@12 for validating set")
     plt.xlabel("Epoch")
     plt.ylabel("map@12")
     plt.legend()
@@ -482,6 +487,8 @@ if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
     
+
+    '''
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
     transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
@@ -490,6 +497,18 @@ if __name__ == '__main__':
     customers_dir = '/home/aymen/data/customers.csv'
     predictions_dir = '/home/aymen/data/submission.csv'
     graph_dir = '/home/aymen/data/'
+    '''
+    
+    
+    images_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/images/images_test/'
+    transactions_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/transactions_train_20.csv'
+    transactions_dir_train = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/transactions_train_20.csv'
+    transactions_dir_valid = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/transactions_train_20.csv' #TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    articles_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/articles.csv'
+    customers_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/customers_20.csv'
+    predictions_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/submission.csv'
+    graph_dir = '/home/echarghaoui/github_Aymen/H-M-Personalized-Fashion-Recommendations/data/'
+    
     
     batch_size = 64
     max_epoch = 10
@@ -501,8 +520,25 @@ if __name__ == '__main__':
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
     # based on all 105543 articles
-    group2id,id2group,group_sizes = createArticlesDic(articles_dir=articles_dir)
+    #group2id,id2group,group_sizes = createArticlesDic(articles_dir=articles_dir)
 
+    
+    #just for test
+    images_set = set([image[:-4] for image in os.listdir(images_dir)])
+    group2id = {}
+    id2group = {}
+    i = 0
+    for image in images_set:
+        if(i<10):
+            id2group[image] = (0,i)
+            group2id[(0,i)] = image
+            i += 1
+        else:
+            id2group[image] = (1,i-10)
+            group2id[(1,i-10)] = image
+            i += 1
+    group_sizes = [10,10]
+    
 
     train_datasets = createDataset(images_dir=images_dir,id2group=id2group,group_sizes=group_sizes,\
         transactions_dir=transactions_dir_train, transform = myTransform)
@@ -515,21 +551,22 @@ if __name__ == '__main__':
         model.apply(init_weights_xavier_uniform)
         models.append(model)
 
-    train_loss,train_map,valid_map = trainer_all(train_datasets,models,batch_size,torch.nn.BCEWithLogitsLoss(), \
+    opt_epoch,train_loss,train_map,valid_map = trainer_all(train_datasets,models,batch_size,torch.nn.BCEWithLogitsLoss(), \
             max_epoch=max_epoch,rate=rate, train_period=train_period,id2group=id2group,group2id=group2id, \
             group_sizes=group_sizes,tr_train_dir=transactions_dir_train,tr_valid_dir=transactions_dir_valid,\
             cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,\
             num_articles=num_articles,num_reccom=num_recomm,transform=myTransform)
 
+    assert len(train_map)==opt_epoch+1
     print("training of all models"+": --- %s seconds ---" % (time.time() - start_time))
 
     for i in range(len(group_sizes)):
         # saving all 10 models per group 
         model_submit_dir = './data/model'+str(i)+'.pt'
         torch.save(models[i].state_dict(), model_submit_dir)
-        lossPlot(train_loss,graph_dir,i)
+        lossPlot(train_loss[:,i],graph_dir,i,opt_epoch)
     
-    mapPlot(train_map,valid_map,graph_dir)
+    mapPlot(train_map,valid_map,graph_dir,opt_epoch)
 
     
     predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
