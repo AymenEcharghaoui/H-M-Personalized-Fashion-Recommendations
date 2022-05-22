@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import random
 import time
-import cloudpickle as pickle
+import pickle
 
 # Ignore warnings
 # import warnings
@@ -75,11 +75,42 @@ def creatDataset(images_dir, articles_dir,transactions_dir, transform=None):
                             id_relevant.append(p_article)
                         else:
                             relevant[p_article].add(id2group[article])
+    
     # creat datasets
     datasets = [] #list of datasets
     for i in range(len(group_sizes)):
         datasets.append(ArticlesDataset(i,images_dir,group_sizes[i],relevant,id_relevant,transform=transform))
         
+    return (group2id,id2group,group_sizes,datasets,relevant,id_relevant)
+
+def saveDatasets(group2id,id2group,group_sizes,relevant,id_relevant):
+    with open("group2id.pkl", "wb") as f:
+        pickle.dump(group2id,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("id2group.pkl", "wb") as f:
+        pickle.dump(id2group,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("group_sizes.pkl", "wb") as f:
+        pickle.dump(group_sizes,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("relevant.pkl", "wb") as f:
+        pickle.dump(relevant,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("id_relevant.pkl", "wb") as f:
+        pickle.dump(id_relevant,f,protocol=pickle.HIGHEST_PROTOCOL)
+        
+def loadDatasets(images_dir, transform=None):
+    with open("group2id.pkl", "rb") as f:
+        group2id = pickle.load(f)
+    with open("id2group.pkl", "rb") as f:
+        id2group = pickle.load(f)
+    with open("group_sizes.pkl", "rb") as f:
+        group_sizes = pickle.load(f)
+    with open("relevant.pkl", "rb") as f:
+        relevant = pickle.load(f)
+    with open("id_relevant.pkl", "rb") as f:
+        id_relevant = pickle.load(f)
+    
+    datasets = [] #list of datasets
+    for i in range(len(group_sizes)):
+        datasets.append(ArticlesDataset(i,images_dir,group_sizes[i],relevant,id_relevant,transform=transform))
+    
     return (group2id,id2group,group_sizes,datasets)
 
 def creatArticlesDic(articles_dir):
@@ -455,10 +486,10 @@ if __name__ == '__main__':
     loss_dir = '/home/aymen/data/'
     '''
     images_dir = './data/images/images_test/'
-    transactions_dir_train = './data/transactions_train_10.csv'
+    transactions_dir_train = './data/transactions_train_20.csv'
     articles_dir = './data/articles.csv'
-    customers_dir = './data/customers_10.csv'
-    predictions_dir='./data/submission_10.csv'
+    customers_dir = './data/customers_20.csv'
+    predictions_dir='./data/submission_20.csv'
     loss_dir = './data/'
     '''
     
@@ -471,7 +502,9 @@ if __name__ == '__main__':
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
-    (group2id,id2group,group_sizes,datasets) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
+    (group2id,id2group,group_sizes,datasets) = loadDatasets(images_dir,transform=myTransform)
     print("creating dataset : --- %s seconds ---" % (time.time() - start_time))
     
     models = []
@@ -501,9 +534,9 @@ if __name__ == '__main__':
     '''
     predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
-    map12 = score(tr_dir=transactions_dir_train,pred_dir=predictions_dir,num_recomm=num_recomm)
+    map12 = score(tr_dir=transactions_dir_test,pred_dir=predictions_dir,num_recomm=num_recomm)
     print("map12 score is",map12)
-
+    
 # ======Biao's test=========
 # (group2id,id2group,group_sizes,datasets) = creatDataset('./data/images/images_test/', './data/articles.csv', './data/transactions_train_10.csv', transform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()]))
 # print(datasets[0][0][0][1][11][11])
