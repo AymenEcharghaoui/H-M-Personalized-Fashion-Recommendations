@@ -444,7 +444,7 @@ def init_weights_xavier_uniform(m):
 if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
-    '''
+    
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
     transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
@@ -460,7 +460,7 @@ if __name__ == '__main__':
     customers_dir = './data/customers_10.csv'
     predictions_dir='./data/submission_10.csv'
     loss_dir = './data/'
-    
+    '''
     
     batch_size = 64
     epoch = 10
