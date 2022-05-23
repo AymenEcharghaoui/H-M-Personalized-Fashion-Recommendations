@@ -9,3 +9,4 @@ for image_name in os.listdir(images_dir):
         image = io.imread(img_name)
     except:
         print(image_name)
+        continue
