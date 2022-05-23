@@ -524,9 +524,9 @@ if __name__ == '__main__':
     
     images_dir = '/home/aymen/data/images__all/'
     transactions_dir = '/home/aymen/data/transactions_train.csv'
-    transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
-    transactions_dir_valid = '/home/aymen/data/transactions_train_test.csv'
-    articles_dir = '/home/aymen/data/articles.csv'
+    transactions_dir_train = '/home/aymen/data/transactions_train_train1month.csv'
+    transactions_dir_valid = '/home/aymen/data/transactions_train_test1month.csv'
+    articles_dir = '/home/aymen/data/articles_1month.csv'
     customers_dir = '/home/aymen/data/customers.csv'
     predictions_dir = '/home/aymen/data/submission.csv'
     graph_dir = '/home/aymen/data/'
