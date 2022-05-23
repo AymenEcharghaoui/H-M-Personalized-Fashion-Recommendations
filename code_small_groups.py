@@ -260,30 +260,34 @@ class Model(torch.nn.Module):
 
     def __init__(self,group_length,activation = torch.nn.ReLU()) :
         super().__init__()
-        self.conv1 = torch.nn.Conv2d(3,6,kernel_size=3,stride=1,padding=1)
-        self.pool2 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
-        self.conv3 = torch.nn.Conv2d(6,9,kernel_size=3,stride=1,padding=1)
+        self.conv1 = torch.nn.Conv2d(3,4,kernel_size=3,stride=1,padding=1)
+        self.pool2 = torch.nn.MaxPool2d(kernel_size=4,stride=4,padding=0)
+        self.conv3 = torch.nn.Conv2d(4,5,kernel_size=3,stride=1,padding=1)
         self.pool4 = torch.nn.MaxPool2d(kernel_size=4,stride=4,padding=0)
-        self.dense5 = torch.nn.Linear(9*28*28,int(group_length/2))
+        self.dense5 = torch.nn.Linear(5*14*14,int(group_length/2))
+        self.batchNorm = torch.nn.BatchNorm1d(int(group_length/2))
         self.dense6 = torch.nn.Linear(int(group_length/2),group_length)
         self.activation = activation
 
     def forward(self,x) :
         z = self.conv1(x)
+        z = self.activation(z)
         z = self.pool2(z)
         z = self.conv3(z)
+        z = self.activation(z)
         z = self.pool4(z)
         z = z.view(z.size(0),-1)
         z = self.dense5(z)
+        z = self.batchNorm(z)
         z = self.activation(z)
         z = self.dense6(z)
 
         return z
 
 def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_period,id2group,group2id,group_sizes,\
-    tr_train_dir,cust_dir,pred_dir,images_dir,num_articles,num_reccom,transform,tr_valid_dir=None):
+    tr_train_dir,cust_dir,pred_dir,images_dir,graph_dir,num_articles,num_reccom,transform,tr_valid_dir=None):
 
-    training_generators = [DataLoader(train_datasets[i], batch_size = batch_size,shuffle = True, num_workers = 1) for i in range(len(group_sizes))]
+    training_generators = [DataLoader(train_datasets[i], batch_size = batch_size,shuffle = True, num_workers = 4) for i in range(len(group_sizes))]
     optimizers = [torch.optim.Adam(params=models[i].parameters(),lr=rate,weight_decay=1e-4) for i in range(len(group_sizes))]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -300,7 +304,7 @@ def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_pe
             running_loss = 0.0
             total = 0
             models[j].to(device)
-
+            model.train()
             for k,sample_batched in enumerate(training_generators[j]):
                 x,y = sample_batched
                 x = x.to(device)
@@ -317,23 +321,27 @@ def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_pe
                 if k % train_period == train_period-1:
                     print('epoch:%d, period:%d running loss: %.3f' %(i , k , loss.item()))
 
-
             models[j].to(torch.device('cpu'))
             torch.cuda.empty_cache()
+
             running_loss = running_loss/total
             print('epoch:%d average loss: %.3f' %(i , running_loss))
             train_loss[i][j] = running_loss
+
+            torch.save(models[j].state_dict(), graph_dir + 'model'+str(j)+'.pt')
 
         if(tr_valid_dir):
             pred_train_dir = pred_dir[:-4]+ '_train'+str(i)+ '.csv'
             predictions(models,id2group,group2id,group_sizes,tr_train_dir,cust_dir,pred_train_dir,images_dir,num_articles,num_reccom=num_reccom,transform=transform)
             train_map.append(score(tr_train_dir,pred_train_dir,num_recomm))
+            print('train_map %.4f for epoch: %d' %(train_map[-1],i))
 
             pred_valid_dir = pred_dir[:-4]+ '_valid'+str(i) + '.csv'
             predictions(models,id2group,group2id,group_sizes,tr_valid_dir,cust_dir,pred_valid_dir,images_dir,num_articles,num_reccom=num_reccom,transform=transform)
             valid_map.append(score(tr_valid_dir,pred_valid_dir,num_recomm))
+            print('test_map %.4f for epoch: %d' %(valid_map[-1],i))
 
-            if(i>=1 and valid_map[-1]<=valid_map[-2]):
+            if(i>=2 and valid_map[-1]<=valid_map[-2] and valid_map[-2]<=valid_map[-3]):
                 break
         i += 1
         
@@ -395,6 +403,9 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
         images_dir (string): Directory with all the images.
         num_articles (int): total number of articles
     """
+    for i in range(len(models)):
+        models[i].eval()
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     group_sizes_cumm = []
@@ -553,7 +564,7 @@ if __name__ == '__main__':
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
     # based on all 105543 articles
-    group2id,id2group,group_sizes = createArticlesDic(articles_dir=articles_dir)
+    #group2id,id2group,group_sizes = createArticlesDic(articles_dir=articles_dir)
 
     '''
     #just for test
@@ -573,12 +584,15 @@ if __name__ == '__main__':
     group_sizes = [10,10]
     '''
 
+    '''
     train_datasets,relevant,id_relevant = createDataset(images_dir=images_dir,id2group=id2group,group_sizes=group_sizes,\
         transactions_dir=transactions_dir_train, transform = myTransform)
-
+    '''
     print("creating datasets : --- %s seconds ---" % (time.time() - start_time))
     
-    saveDatasets(group2id,id2group,group_sizes,relevant,id_relevant)
+    #saveDatasets(group2id,id2group,group_sizes,relevant,id_relevant)
+
+    group2id,id2group,group_sizes,train_datasets = loadDatasets(images_dir=images_dir,transform=myTransform)
 
     models = []
     for i in range(len(group_sizes)):
@@ -589,7 +603,7 @@ if __name__ == '__main__':
     opt_epoch,train_loss,train_map,valid_map = trainer_all(train_datasets,models,batch_size,torch.nn.BCEWithLogitsLoss(), \
             max_epoch=max_epoch,rate=rate, train_period=train_period,id2group=id2group,group2id=group2id, \
             group_sizes=group_sizes,tr_train_dir=transactions_dir_train,tr_valid_dir=transactions_dir_valid,\
-            cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,\
+            cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,graph_dir=graph_dir,\
             num_articles=num_articles,num_reccom=num_recomm,transform=myTransform)
 
     assert len(train_map)==opt_epoch+1
@@ -597,8 +611,10 @@ if __name__ == '__main__':
 
     for i in range(len(group_sizes)):
         # saving all 10 models per group 
+        '''
         model_submit_dir = './data/model'+str(i)+'.pt'
         torch.save(models[i].state_dict(), model_submit_dir)
+        '''
         lossPlot(train_loss[:,i],graph_dir,i,opt_epoch)
     
     mapPlot(train_map,valid_map,graph_dir,opt_epoch)
