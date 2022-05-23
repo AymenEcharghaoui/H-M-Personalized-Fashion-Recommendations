@@ -266,18 +266,20 @@ class Model(torch.nn.Module):
 
     def __init__(self,group_length,activation = torch.nn.ReLU()) :
         super().__init__()
-        self.conv1 = torch.nn.Conv2d(3,6,kernel_size=3,stride=1,padding=1)
-        self.pool2 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
-        self.conv3 = torch.nn.Conv2d(6,9,kernel_size=3,stride=1,padding=1)
+        self.conv1 = torch.nn.Conv2d(3,4,kernel_size=3,stride=1,padding=1)
+        self.pool2 = torch.nn.MaxPool2d(kernel_size=4,stride=4,padding=0)
+        self.conv3 = torch.nn.Conv2d(4,5,kernel_size=3,stride=1,padding=1)
         self.pool4 = torch.nn.MaxPool2d(kernel_size=4,stride=4,padding=0)
-        self.dense5 = torch.nn.Linear(9*28*28,int(group_length/2))
+        self.dense5 = torch.nn.Linear(5*14*14,int(group_length/2))
         self.dense6 = torch.nn.Linear(int(group_length/2),group_length)
         self.activation = activation
 
     def forward(self,x) :
         z = self.conv1(x)
+        z = self.activation(z)
         z = self.pool2(z)
         z = self.conv3(z)
+        z = self.activation(z)
         z = self.pool4(z)
         z = z.view(z.size(0),-1)
         z = self.dense5(z)
@@ -289,7 +291,7 @@ class Model(torch.nn.Module):
 
 def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
     begin_time = time.time()
-    optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4)
+    optimizer = torch.optim.AdamW(params=model.parameters(),lr=rate,weight_decay=1e-4)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -309,10 +311,10 @@ def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
             optimizer.step()
             
             total += y.size(0)
-            running_loss += loss.item() * y.size(0)
+            running_loss += loss.detach() * y.size(0)
             
             if j % train_period == train_period-1:
-                print('epoch:%d, period:%d running loss: %.5f' %(i + 1, j + 1, loss.item()))
+                print('epoch:%d, period:%d running loss: %.5f' %(i + 1, j + 1, loss.detach()))
                 print("time:",time.time()-begin_time)
         
         running_loss = running_loss/total
@@ -321,6 +323,7 @@ def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
         train_loss.append(running_loss)
         
     return train_loss
+
 def score(tr_dir,pred_dir,num_recomm=12):
     """
     return MAP@12 over the test dataset
@@ -504,7 +507,7 @@ if __name__ == '__main__':
     batch_size = 512
     epoch = 5
     rate = 1e-3
-    train_period = 10
+    train_period = 5
     num_recomm = 12
     
     num_articles = len(os.listdir(images_dir)) #105100
@@ -522,7 +525,7 @@ if __name__ == '__main__':
 
         dataset = datasets[i]
         print("dataset "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
-        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 1)
+        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
         model = Model(group_length=group_sizes[i])
         model.apply(init_weights_xavier_uniform)
         if(torch.cuda.is_available()):
