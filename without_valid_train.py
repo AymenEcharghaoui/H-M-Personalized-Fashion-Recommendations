@@ -268,9 +268,9 @@ class Model(torch.nn.Module):
         super().__init__()
         self.conv1 = torch.nn.Conv2d(3,6,kernel_size=3,stride=1,padding=1)
         self.pool2 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
-        self.conv3 = torch.nn.Conv2d(6,16,kernel_size=3,stride=1,padding=1)
-        self.pool4 = torch.nn.MaxPool2d(kernel_size=2,stride=2,padding=0)
-        self.dense5 = torch.nn.Linear(16*56*56,int(group_length/2))
+        self.conv3 = torch.nn.Conv2d(6,9,kernel_size=3,stride=1,padding=1)
+        self.pool4 = torch.nn.MaxPool2d(kernel_size=4,stride=4,padding=0)
+        self.dense5 = torch.nn.Linear(9*28*28,int(group_length/2))
         self.dense6 = torch.nn.Linear(int(group_length/2),group_length)
         self.activation = activation
 
@@ -485,10 +485,10 @@ if __name__ == '__main__':
     print('Is cuda available?', torch.cuda.is_available())
     
     images_dir = '/home/Biao/data/images__all/'
-    transactions_dir = '/home/Biao/data/transactions_train.csv'
-    transactions_dir_train = '/home/Biao/data/transactions_train_train.csv'
-    transactions_dir_test = '/home/Biao/data/transactions_train_test.csv'
-    articles_dir = '/home/Biao/data/articles.csv'
+    transactions_dir = '/home/Biao/data/transactions_train_train1month.csv'
+    transactions_dir_train = '/home/Biao/data/transactions_train_train1month.csv'
+    transactions_dir_test = '/home/Biao/data/transactions_train_test1week.csv'
+    articles_dir = '/home/Biao/data/articles_1month.csv'
     customers_dir = '/home/Biao/data/customers.csv'
     predictions_dir = '/home/Biao/data/submission.csv'
     loss_dir = '/home/Biao/data/'
@@ -545,11 +545,11 @@ if __name__ == '__main__':
     map12 = score(tr_dir=transactions_dir_test,pred_dir=predictions_dir,num_recomm=num_recomm)
     print("map12 score is",map12)
     print("calculating map12 : --- %s seconds ---" % (time.time() - start_time))
-    
+
 # ======Biao's test=========
 # (group2id,id2group,group_sizes,datasets) = creatDataset('./data/images/images_test/', './data/articles.csv', './data/transactions_train_10.csv', transform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()]))
 # print(datasets[0][0][0][1][11][11])
 
-# (group2id,id2group,group_sizes) = creatArticlesDic('./data/articles.csv')
+# (group2id,id2group,group_sizes) = creatArticlesDic('./data/articles_1month.csv')
 # print(group_sizes)
 # print(id2group)

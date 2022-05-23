@@ -39,9 +39,10 @@ if __name__ == '__main__':
     Name: 31788323, dtype: object
     '''
     
-    usecols=['t_dat','customer_id','article_id']
-    dataSplit(dataAdress, usecols, '2020-09-16')
+    # usecols=['t_dat','customer_id','article_id']
+    # dataSplit(dataAdress, usecols, '2020-09-16')
     
     # dataHead("./data/transactions_train.csv", None, head=20)
     # dataHead("./data/customers.csv", None, 20)
+    
     
