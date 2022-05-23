@@ -501,8 +501,8 @@ if __name__ == '__main__':
     loss_dir = './data/'
     '''
     
-    batch_size = 64
-    epoch = 10
+    batch_size = 512
+    epoch = 5
     rate = 1e-3
     train_period = 10
     num_recomm = 12
