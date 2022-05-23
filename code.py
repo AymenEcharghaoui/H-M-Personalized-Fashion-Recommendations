@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import random
 import time
-import cloudpickle as pickle
+import pickle 
 
 # Ignore warnings
 # import warnings
@@ -74,7 +74,7 @@ def createDataset(images_dir,id2group,group_sizes,transactions_dir, transform=No
     for i in range(len(group_sizes)):
         datasets.append(ArticlesDataset(i,images_dir,group_sizes[i],relevant,id_relevant,transform=transform))
         
-    return datasets
+    return datasets,relevant,id_relevant
 
 def createArticlesDic(articles_dir):
     # based on all articles in articles.csv
@@ -224,6 +224,38 @@ class ToTensor(object):
         img = image.transpose((2, 0, 1))
         return torch.from_numpy(img).type(torch.float32)
 
+def saveDatasets(group2id,id2group,group_sizes,relevant,id_relevant):
+    with open("group2id.pkl", "wb") as f:
+        pickle.dump(group2id,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("id2group.pkl", "wb") as f:
+        pickle.dump(id2group,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("group_sizes.pkl", "wb") as f:
+        pickle.dump(group_sizes,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("relevant.pkl", "wb") as f:
+        pickle.dump(relevant,f,protocol=pickle.HIGHEST_PROTOCOL)
+    with open("id_relevant.pkl", "wb") as f:
+        pickle.dump(id_relevant,f,protocol=pickle.HIGHEST_PROTOCOL)
+        
+def loadDatasets(images_dir, transform=None):
+    with open("group2id.pkl", "rb") as f:
+        group2id = pickle.load(f)
+    with open("id2group.pkl", "rb") as f:
+        id2group = pickle.load(f)
+    with open("group_sizes.pkl", "rb") as f:
+        group_sizes = pickle.load(f)
+    with open("relevant.pkl", "rb") as f:
+        relevant = pickle.load(f)
+    with open("id_relevant.pkl", "rb") as f:
+        id_relevant = pickle.load(f)
+    
+    datasets = [] #list of datasets
+    for i in range(len(group_sizes)):
+        datasets.append(ArticlesDataset(i,images_dir,group_sizes[i],relevant,id_relevant,transform=transform))
+    
+    return (group2id,id2group,group_sizes,datasets)
+
+
+
 class Model(torch.nn.Module):
 
     def __init__(self,group_length,activation = torch.nn.ReLU()) :
@@ -268,6 +300,7 @@ def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_pe
             running_loss = 0.0
             total = 0
             models[j].to(device)
+
             for k,sample_batched in enumerate(training_generators[j]):
                 x,y = sample_batched
                 x = x.to(device)
@@ -520,9 +553,9 @@ if __name__ == '__main__':
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
     # based on all 105543 articles
-    #group2id,id2group,group_sizes = createArticlesDic(articles_dir=articles_dir)
+    group2id,id2group,group_sizes = createArticlesDic(articles_dir=articles_dir)
 
-    
+    '''
     #just for test
     images_set = set([image[:-4] for image in os.listdir(images_dir)])
     group2id = {}
@@ -538,13 +571,15 @@ if __name__ == '__main__':
             group2id[(1,i-10)] = image
             i += 1
     group_sizes = [10,10]
-    
+    '''
 
-    train_datasets = createDataset(images_dir=images_dir,id2group=id2group,group_sizes=group_sizes,\
+    train_datasets,relevant,id_relevant = createDataset(images_dir=images_dir,id2group=id2group,group_sizes=group_sizes,\
         transactions_dir=transactions_dir_train, transform = myTransform)
 
     print("creating datasets : --- %s seconds ---" % (time.time() - start_time))
     
+    saveDatasets(group2id,id2group,group_sizes,relevant,id_relevant)
+
     models = []
     for i in range(len(group_sizes)):
         model = Model(group_length=group_sizes[i])
