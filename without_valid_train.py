@@ -276,8 +276,10 @@ class Model(torch.nn.Module):
 
     def forward(self,x) :
         z = self.conv1(x)
+        z = self.activation(z)
         z = self.pool2(z)
         z = self.conv3(z)
+        z = self.activation(z)
         z = self.pool4(z)
         z = z.view(z.size(0),-1)
         z = self.dense5(z)
