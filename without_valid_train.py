@@ -513,8 +513,8 @@ if __name__ == '__main__':
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
-    # (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
-    # saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
+    (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
     (group2id,id2group,group_sizes,datasets) = loadDatasets(images_dir,transform=myTransform)
     print("creating dataset : --- %s seconds ---" % (time.time() - start_time))
     
