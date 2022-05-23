@@ -288,6 +288,7 @@ class Model(torch.nn.Module):
 
 
 def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
+    begin_time = time.time()
     optimizer = torch.optim.Adam(params=model.parameters(),lr=rate,weight_decay=1e-4)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -311,10 +312,12 @@ def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
             running_loss += loss.item() * y.size(0)
             
             if j % train_period == train_period-1:
-                print('epoch:%d, period:%d running loss: %.3f' %(i + 1, j + 1, loss.item()))
+                print('epoch:%d, period:%d running loss: %.5f' %(i + 1, j + 1, loss.item()))
+                print("time:",time.time()-begin_time)
         
         running_loss = running_loss/total
-        print('epoch:%d average loss: %.3f' %(i + 1, running_loss))
+        print('epoch:%d average loss: %.5f' %(i + 1, running_loss))
+        print("time:",time.time()-begin_time)
         train_loss.append(running_loss)
         
     return train_loss
@@ -498,8 +501,8 @@ if __name__ == '__main__':
     loss_dir = './data/'
     '''
     
-    batch_size = 64
-    epoch = 10
+    batch_size = 512
+    epoch = 5
     rate = 1e-3
     train_period = 10
     num_recomm = 12
@@ -541,6 +544,7 @@ if __name__ == '__main__':
     print("making predictions : --- %s seconds ---" % (time.time() - start_time))
     map12 = score(tr_dir=transactions_dir_test,pred_dir=predictions_dir,num_recomm=num_recomm)
     print("map12 score is",map12)
+    print("calculating map12 : --- %s seconds ---" % (time.time() - start_time))
     
 # ======Biao's test=========
 # (group2id,id2group,group_sizes,datasets) = creatDataset('./data/images/images_test/', './data/articles.csv', './data/transactions_train_10.csv', transform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()]))
