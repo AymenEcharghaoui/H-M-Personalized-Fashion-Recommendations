@@ -344,18 +344,20 @@ def score(tr_dir,pred_dir,num_recomm=12):
     next(subm_reader)
     count_customers = 0
     for row in subm_reader:
-        count_customers += 1
-        # going through all customers
-        average_precision = 0
-        reccomandations = row[1].split()
         customer_id = row[0]
-        relevant = 0
-        for i in range(num_recomm):
-            if(reccomandations[i] in transactions[customer_id]):
-                relevant += 1
-                average_precision += relevant/(i+1)
-        average_precision /= min(12,len(transactions[customer_id]))
-        map12 += average_precision
+        if(customer_id in transactions):
+            count_customers += 1
+            # going through all customers
+            average_precision = 0
+            reccomandations = row[1].split()
+            
+            relevant = 0
+            for i in range(num_recomm):
+                if(reccomandations[i] in transactions[customer_id]):
+                    relevant += 1
+                    average_precision += relevant/(i+1)
+            average_precision /= min(12,len(transactions[customer_id]))
+            map12 += average_precision
     map12 /= count_customers
     return map12
 
@@ -431,8 +433,8 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
         if(not(is_active[row['customer_id']])):
             # new customer : generate num_reccom random articles
             for _ in range(num_reccom-1):
-                articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]+" "
-            articles += os.listdir(images_dir)[random.randint(0,num_articles)][:-4]
+                articles += os.listdir(images_dir)[random.randint(0,num_articles-1)][:-4]+" "
+            articles += os.listdir(images_dir)[random.randint(0,num_articles-1)][:-4]
         else:
             indices = reccs.topk(num_reccom).indices
             '''
@@ -441,9 +443,9 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
             articles += os.listdir(images_dir)[indices[num_reccom-1]][:-4]
             '''
             for i in range(num_reccom):
-                index = indices[i]
+                index = indices[i].item()
                 j = 0
-                while(indexgroup_sizes_cumm[j]):
+                while(index>=group_sizes_cumm[j]):
                     j += 1
                 # image in group j
                 if(j>0):
@@ -479,14 +481,14 @@ if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
     
-    images_dir = '/home/aymen/data/images__all/'
-    transactions_dir = '/home/aymen/data/transactions_train.csv'
-    transactions_dir_train = '/home/aymen/data/transactions_train_train.csv'
-    transactions_dir_test = '/home/aymen/data/transactions_train_test.csv'
-    articles_dir = '/home/aymen/data/articles.csv'
-    customers_dir = '/home/aymen/data/customers.csv'
-    predictions_dir = '/home/aymen/data/submission.csv'
-    loss_dir = '/home/aymen/data/'
+    images_dir = '/home/Biao/data/images__all/'
+    transactions_dir = '/home/Biao/data/transactions_train.csv'
+    transactions_dir_train = '/home/Biao/data/transactions_train_train.csv'
+    transactions_dir_test = '/home/Biao/data/transactions_train_test.csv'
+    articles_dir = '/home/Biao/data/articles.csv'
+    customers_dir = '/home/Biao/data/customers.csv'
+    predictions_dir = '/home/Biao/data/submission.csv'
+    loss_dir = '/home/Biao/data/'
     '''
     images_dir = './data/images/images_test/'
     transactions_dir_train = './data/transactions_train_20.csv'
@@ -505,8 +507,8 @@ if __name__ == '__main__':
     num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
-    (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
-    saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
+    # (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    # saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
     (group2id,id2group,group_sizes,datasets) = loadDatasets(images_dir,transform=myTransform)
     print("creating dataset : --- %s seconds ---" % (time.time() - start_time))
     
@@ -517,7 +519,7 @@ if __name__ == '__main__':
 
         dataset = datasets[i]
         print("dataset "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
-        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 2)
+        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 1)
         model = Model(group_length=group_sizes[i])
         model.apply(init_weights_xavier_uniform)
         if(torch.cuda.is_available()):
