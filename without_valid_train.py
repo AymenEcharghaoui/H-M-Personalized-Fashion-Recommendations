@@ -532,6 +532,9 @@ if __name__ == '__main__':
             model.cuda()
         train_loss = trainer(training_generator,model,torch.nn.BCEWithLogitsLoss(),epoch=epoch,rate=rate, train_period=train_period)
         torch.save(model.state_dict(), model_submit_dir)
+        
+        with open("train_loss"+str(i)+".pkl", "wb") as f:
+            pickle.dump(train_loss,f,protocol=pickle.HIGHEST_PROTOCOL)
         # lossPlot(train_loss,loss_dir,i)
         print("training "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
         model.to(torch.device('cpu'))
