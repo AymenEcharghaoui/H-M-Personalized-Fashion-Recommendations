@@ -285,7 +285,7 @@ class Model(torch.nn.Module):
         return z
 
 def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_period,id2group,group2id,group_sizes,\
-    tr_train_dir,cust_dir,pred_dir,images_dir,graph_dir,num_articles,num_reccom,transform,tr_valid_dir=None):
+    tr_train_dir,cust_dir,pred_dir,images_dir,graph_dir,num_reccom,transform,tr_valid_dir=None):
 
     training_generators = [DataLoader(train_datasets[i], batch_size = batch_size,shuffle = True, num_workers = 4) for i in range(len(group_sizes))]
     optimizers = [torch.optim.Adam(params=models[i].parameters(),lr=rate,weight_decay=1e-4) for i in range(len(group_sizes))]
@@ -332,12 +332,12 @@ def trainer_all(train_datasets,models,batch_size,loss_fn,max_epoch,rate,train_pe
 
         if(tr_valid_dir):
             pred_train_dir = pred_dir[:-4]+ '_train'+str(i)+ '.csv'
-            predictions(models,id2group,group2id,group_sizes,tr_train_dir,cust_dir,pred_train_dir,images_dir,num_articles,num_reccom=num_reccom,transform=transform)
+            predictions(models,id2group,group2id,group_sizes,tr_train_dir,cust_dir,pred_train_dir,images_dir,num_reccom=num_reccom,transform=transform)
             train_map.append(score(tr_train_dir,pred_train_dir,num_recomm))
             print('train_map %.4f for epoch: %d' %(train_map[-1],i))
 
             pred_valid_dir = pred_dir[:-4]+ '_valid'+str(i) + '.csv'
-            predictions(models,id2group,group2id,group_sizes,tr_valid_dir,cust_dir,pred_valid_dir,images_dir,num_articles,num_reccom=num_reccom,transform=transform)
+            predictions(models,id2group,group2id,group_sizes,tr_valid_dir,cust_dir,pred_valid_dir,images_dir,num_reccom=num_reccom,transform=transform)
             valid_map.append(score(tr_valid_dir,pred_valid_dir,num_recomm))
             print('test_map %.4f for epoch: %d' %(valid_map[-1],i))
 
@@ -389,7 +389,7 @@ def score(tr_dir,pred_dir,num_recomm=12):
     map12 /= count_customers
     return map12
 
-def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,images_dir,num_articles,num_reccom=12,transform=None) :
+def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,images_dir,num_reccom=12,transform=None) :
     """
     store a sample submission csv file in pred_dir
     Args :
@@ -401,7 +401,6 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
         cust_dir (string): directory of customers.csv
         pred_dir (string): directory of the submission file
         images_dir (string): Directory with all the images.
-        num_articles (int): total number of articles
     """
     for i in range(len(models)):
         models[i].eval()
@@ -414,7 +413,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
         start += size
         group_sizes_cumm.append(start)
 
-    assert group_sizes_cumm[-1] == num_articles
+    num_articles = group_sizes_cumm[-1]
 
     recommandations = {}
     is_active = {}
@@ -560,7 +559,7 @@ if __name__ == '__main__':
     train_period = 10
     num_recomm = 12
     
-    num_articles = len(os.listdir(images_dir)) #105100
+    #num_articles = len(os.listdir(images_dir)) #105100
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
     
     # based on all 105543 articles
@@ -604,7 +603,7 @@ if __name__ == '__main__':
             max_epoch=max_epoch,rate=rate, train_period=train_period,id2group=id2group,group2id=group2id, \
             group_sizes=group_sizes,tr_train_dir=transactions_dir_train,tr_valid_dir=transactions_dir_valid,\
             cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,graph_dir=graph_dir,\
-            num_articles=num_articles,num_reccom=num_recomm,transform=myTransform)
+            num_reccom=num_recomm,transform=myTransform)
 
     assert len(train_map)==opt_epoch+1
     print("training of all models"+": --- %s seconds ---" % (time.time() - start_time))
@@ -620,7 +619,7 @@ if __name__ == '__main__':
     mapPlot(train_map,valid_map,graph_dir,opt_epoch)
 
     
-    predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
+    predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
 
