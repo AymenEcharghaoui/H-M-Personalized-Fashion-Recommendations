@@ -9,6 +9,7 @@ from torchvision import transforms
 import random
 import time
 import pickle
+import torch.utils.model_zoo as model_zoo
 
 # Ignore warnings
 # import warnings
@@ -364,13 +365,16 @@ class Model(torch.nn.Module):
         return z
 
 
-def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
+def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train_period) :
+    training_generator = DataLoader(train_dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
+    
     begin_time = time.time()
     optimizer = torch.optim.AdamW(params=model.parameters(),lr=rate,weight_decay=1e-4)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     train_loss = []
+    test_loss = []
 
     for i in range(epoch):
         running_loss = 0.0
@@ -397,7 +401,38 @@ def trainer(training_generator,model,loss_fn,epoch,rate,train_period) :
         print("time:",time.time()-begin_time)
         train_loss.append(running_loss)
         
-    return train_loss
+        average_test_loss = testLoss(test_dataset,model,loss_fn,batch_size)
+        print('epoch:%d test loss: %.5f' %(i + 1, average_test_loss))
+        print("time:",time.time()-begin_time)
+        test_loss.append(test_loss)
+        
+    return train_loss, test_loss
+    
+def testLoss(test_dataset,model,loss_fn,batch_size):
+    model.eval()
+    
+    test_generator = DataLoader(test_dataset, batch_size = batch_size,shuffle = True, num_workers = 2)
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    running_loss = 0.0
+    total = 0
+    with torch.no_grad():
+        for j, sample_batched in enumerate(test_generator):
+            x,y = sample_batched
+            x = x.to(device)
+            y = y.to(device)
+            y_pred = model(x)
+            loss = loss_fn(y_pred, y)
+            
+            total += y.size(0)
+            running_loss += loss.detach() * y.size(0)
+    
+    running_loss = running_loss/total
+    
+    model.train()
+    return running_loss
+    
     
 def lossPlot(loss,dir,i):
     plt.plot(loss,label = "loss for training set")
@@ -413,27 +448,90 @@ def lossPlot(loss,dir,i):
 
 def init_weights_xavier_uniform(m):
     if type(m) == torch.nn.Linear:
-      torch.nn.init.xavier_uniform_(m.weight)
+        torch.nn.init.xavier_uniform_(m.weight)
+        
+class AlexNet(torch.nn.Module):
+
+    def __init__(self, num_classes=1000):
+        super(AlexNet, self).__init__()
+        self.features = torch.nn.Sequential(
+            torch.nn.Conv2d(3,64,11,stride=4,padding=2),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.MaxPool2d(3, stride=2),
+            torch.nn.Conv2d(64,192,5,stride=1,padding=2),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.MaxPool2d(3, stride=2),
+            torch.nn.Conv2d(192,384,3,stride=1,padding=1),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Conv2d(384,256,3,stride=1,padding=1),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Conv2d(256,256,3,stride=1,padding=1),
+            torch.nn.ReLU(inplace=True),
+        )
+        self.avgpool = torch.nn.AdaptiveAvgPool2d((6, 6))
+        self.classifier = torch.nn.Sequential(
+            torch.nn.Dropout(),
+            torch.nn.Linear(256 * 6 * 6, 4096),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Dropout(),
+            torch.nn.Linear(4096, 4096),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Linear(4096, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.avgpool(x)
+        x = x.view([x.size()[0],256 * 6 * 6])
+        x = self.classifier(x)
+        return x
+
+model_urls = {
+'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
+}
+
+def alexnet_classifier(num_classes):
+    classifier = torch.nn.Sequential(
+        torch.nn.Dropout(),
+        torch.nn.Linear(256 * 6 * 6, int(num_classes/2) ),
+        torch.nn.BatchNorm1d(int(num_classes/2)),
+        torch.nn.ReLU(inplace=True),
+        torch.nn.Dropout(),
+        torch.nn.Linear(int(num_classes/2), num_classes),
+    )
+    return classifier
+
+def alexnet(num_classes, pretrained=False, **kwargs):
+    """AlexNet model architecture from the "One weird trick..." paper.
+    Args:
+    pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = AlexNet(**kwargs)
+    if pretrained:
+        model.load_state_dict(model_zoo.load_url(model_urls['alexnet']))
+        for p in model.features.parameters():
+            p.requires_grad=False
+    classifier = alexnet_classifier(num_classes)
+    model.classifier = classifier
+    return model
 
 
 if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
-    '''
+    
     images_dir = '/home/Biao/data/images__all/'
     transactions_dir_train = '/home/Biao/data/transactions_train_train1month.csv'
     transactions_dir_test = '/home/Biao/data/transactions_train_test1week.csv'
     articles_dir = '/home/Biao/data/articles_1month.csv'
-    customers_dir = '/home/Biao/data/customers.csv'
-    predictions_dir = '/home/Biao/data/submission.csv'
     loss_dir = '/home/Biao/data/'
     '''
     images_dir = './data/images/images_test/'
-    transactions_dir_train = './data/transactions_train_20.csv'
-    transactions_dir_test = '/home/Biao/data/transactions_train_test1week.csv'
+    transactions_dir_train = './data/transactions_train_train1month.csv'
+    transactions_dir_test = './data/transactions_train_test1week.csv'
     articles_dir = './data/articles_1month.csv'
     loss_dir = './data/'
-    
+    '''
     
     batch_size = 512
     epoch = 5
@@ -441,40 +539,46 @@ if __name__ == '__main__':
     train_period = 5
     num_recomm = 12
     
-    myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()])
+    myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor(),transforms.Normalize((0.5,), (0.5,))])
     
-    # (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
-    # saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
+    (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
     (group2id,id2group,group_sizes,datasets) = loadDatasets(images_dir,transform=myTransform)
     print("creating train dataset : --- %s seconds ---" % (time.time() - start_time))
+    print("number of train dataset: ", len(datasets[0]))
     
-    (test_datasets,test_relevant,test_id_relevant) = creatTestDataset(images_dir, articles_dir, transactions_dir_test, transform = myTransform)
-    saveDatasets(group2id, id2group, group_sizes, test_relevant, testid_relevant, isTrain=False)
-    (group2id,id2group,group_sizes,datasets) = loadDatasets(images_dir,transform=myTransform)
-    print("creating train dataset : --- %s seconds ---" % (time.time() - start_time))
-    
-    models = []
+    (test_datasets,test_relevant,test_id_relevant) = creatTestDataset(images_dir, group2id,id2group,group_sizes, transactions_dir_test, transform = myTransform)
+    saveDatasets(group2id, id2group, group_sizes, test_relevant, test_id_relevant, isTrain=False)
+    (group2id,id2group,group_sizes,test_datasets) = loadDatasets(images_dir,transform=myTransform, isTrain=False)
+    print("creating test dataset : --- %s seconds ---" % (time.time() - start_time))
+    print("number of test dataset: ", len(test_datasets[0]))
+
+    # models = []
     for i in range(1, len(group_sizes)):
 
         model_submit_dir = './data/second_try_model'+str(i)+'.pt'
 
         dataset = datasets[i]
+        test_dataset = test_datasets[i]
         print("dataset "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
-        training_generator = DataLoader(dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
-        model = Model(group_length=group_sizes[i])
+        
+        model = alexnet(num_classes=group_sizes[i], pretrained=True)
         model.apply(init_weights_xavier_uniform)
         if(torch.cuda.is_available()):
             model.cuda()
-        train_loss = trainer(training_generator,model,torch.nn.BCEWithLogitsLoss(),epoch=epoch,rate=rate, train_period=train_period)
+        train_loss,test_loss = trainer(dataset,test_dataset, model,torch.nn.BCEWithLogitsLoss(),batch_size=batch_size,epoch=epoch,rate=rate, train_period=train_period)
         torch.save(model.state_dict(), model_submit_dir)
         
-        with open("train_loss"+str(i)+".pkl", "wb") as f:
+        with open("second_try_train_loss"+str(i)+".pkl", "wb") as f:
             pickle.dump(train_loss,f,protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open("second_try_test_loss"+str(i)+".pkl", "wb") as f:
+            pickle.dump(test_loss,f,protocol=pickle.HIGHEST_PROTOCOL)
         # lossPlot(train_loss,loss_dir,i)
         print("training "+str(i)+": --- %s seconds ---" % (time.time() - start_time))
         model.to(torch.device('cpu'))
         torch.cuda.empty_cache()
-        models.append(model)
+        # models.append(model)
 
 # ======Biao's test=========
 # (group2id,id2group,group_sizes,datasets) = creatDataset('./data/images/images_test/', './data/articles.csv', './data/transactions_train_10.csv', transform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor()]))
