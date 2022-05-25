@@ -366,7 +366,7 @@ class Model(torch.nn.Module):
 
 
 def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train_period) :
-    training_generator = DataLoader(train_dataset, batch_size = batch_size,shuffle = True, num_workers = 5)
+    training_generator = DataLoader(train_dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
     
     test_subset = torch.utils.data.Subset(test_dataset, list(range(2560)))
     
@@ -413,7 +413,7 @@ def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train
 def testLoss(test_dataset,model,loss_fn,batch_size):
     model.eval()
     
-    test_generator = DataLoader(test_dataset, batch_size = batch_size,shuffle = True, num_workers = 5)
+    test_generator = DataLoader(test_dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -543,14 +543,14 @@ if __name__ == '__main__':
     
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor(),transforms.Normalize((0.5,), (0.5,))])
     
-    (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
-    saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
+    # (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    # saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
     (group2id,id2group,group_sizes,datasets) = loadDatasets(images_dir,transform=myTransform)
     print("creating train dataset : --- %s seconds ---" % (time.time() - start_time))
     print("number of train dataset: ", len(datasets[0]))
     
-    (test_datasets,test_relevant,test_id_relevant) = creatTestDataset(images_dir, group2id,id2group,group_sizes, transactions_dir_test, transform = myTransform)
-    saveDatasets(group2id, id2group, group_sizes, test_relevant, test_id_relevant, isTrain=False)
+    # (test_datasets,test_relevant,test_id_relevant) = creatTestDataset(images_dir, group2id,id2group,group_sizes, transactions_dir_test, transform = myTransform)
+    # saveDatasets(group2id, id2group, group_sizes, test_relevant, test_id_relevant, isTrain=False)
     (group2id,id2group,group_sizes,test_datasets) = loadDatasets(images_dir,transform=myTransform, isTrain=False)
     print("creating test dataset : --- %s seconds ---" % (time.time() - start_time))
     print("number of test dataset: ", len(test_datasets[0]))
