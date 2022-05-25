@@ -652,7 +652,8 @@ if __name__ == '__main__':
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
 
-    print(score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm))
+    map = score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm)
+    print(map)
 
     '''
     to load models : 
