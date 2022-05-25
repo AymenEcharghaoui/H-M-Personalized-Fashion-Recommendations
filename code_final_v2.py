@@ -486,7 +486,11 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
     # representatitive for all classes
     rep = []
     for i in range(len(group_sizes)):
-        image = io.imread(os.path.join(images_dir,str(group2id[(i,0)])+'.jpg'))
+        p = 0
+        while(not(os.path.exists(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg')))):
+            p+=1
+            assert (p<group_sizes[i])
+        image = io.imread(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg'))
         if transform:
             image = transform(image)
         image = image.to(device)
