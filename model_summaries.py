@@ -126,9 +126,9 @@ if __name__ == '__main__':
     model1 = Model1(2)
     model3 = alexnet(2)
 
-    print(summary(model0, (3, 224, 224)))
+    print(summary(model0, (3, 224, 224),device='cpu'))
     print('\n')
-    print(summary(model1, (3, 224, 224)))
+    print(summary(model1, (3, 224, 224),device='cpu'))
     print('\n')
-    print(summary(model3, (3, 224, 224)))
+    print(summary(model3, (3, 224, 224),device='cpu'))
     print('\n')
