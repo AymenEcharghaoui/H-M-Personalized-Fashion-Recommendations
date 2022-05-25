@@ -326,7 +326,7 @@ class Model(torch.nn.Module):
         z = self.pool4(z)
         z = z.view(z.size(0),-1)
         z = self.dense5(z)
-        z = self.batchNorm(z)
+        #z = self.batchNorm(z)
         z = self.activation(z)
         z = self.dense6(z)
 
