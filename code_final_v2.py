@@ -386,6 +386,7 @@ def score(tr_dir,pred_dir,num_recomm=12):
             relevant = 0
             for i in range(num_recomm):
                 if(reccomandations[i] in transactions[customer_id]):
+                    print(customer_id+"  GT values : "+str(transactions[customer_id])+" Predictions : "+str(reccomandations[i]))
                     relevant += 1
                     average_precision += relevant/(i+1)
             average_precision /= min(12,len(transactions[customer_id]))
@@ -651,7 +652,8 @@ if __name__ == '__main__':
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
 
-    print(score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm))
+    map = score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm)
+    print(map)
 
     '''
     to load models : 
