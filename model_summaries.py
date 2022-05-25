@@ -122,13 +122,13 @@ def alexnet(num_classes, pretrained=False, **kwargs):
 
 
 if __name__ == '__main__':
-    model0 = Model0(105100)
-    model1 = Model1(2000)
-    model3 = alexnet(2000)
+    model0 = Model0(10)
+    model1 = Model1(2)
+    model3 = alexnet(2)
 
-    print(summary(model0, (3, 224, 224).to(torch.device("cpu"))))
+    print(summary(model0, (3, 224, 224)))
     print('\n')
-    print(summary(model1, (3, 224, 224).to(torch.device("cpu"))))
+    print(summary(model1, (3, 224, 224)))
     print('\n')
-    print(summary(model3, (3, 224, 224).to(torch.device("cpu"))))
+    print(summary(model3, (3, 224, 224)))
     print('\n')
