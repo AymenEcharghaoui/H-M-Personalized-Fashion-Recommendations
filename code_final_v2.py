@@ -489,7 +489,7 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
         p = 0
         while(not(os.path.exists(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg')))):
             p+=1
-            assert (p<len(group_sizes[i]))
+            assert (p<group_sizes[i])
         image = io.imread(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg'))
         if transform:
             image = transform(image)
