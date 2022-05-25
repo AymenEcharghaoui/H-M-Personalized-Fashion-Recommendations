@@ -366,7 +366,9 @@ class Model(torch.nn.Module):
 
 
 def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train_period) :
-    training_generator = DataLoader(train_dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
+    training_generator = DataLoader(train_dataset, batch_size = batch_size,shuffle = True, num_workers = 5)
+    
+    test_subset = torch.utils.data.Subset(test_dataset, list(range(2560)))
     
     begin_time = time.time()
     optimizer = torch.optim.AdamW(params=model.parameters(),lr=rate,weight_decay=1e-4)
@@ -375,7 +377,7 @@ def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train
     
     train_loss = []
     test_loss = []
-
+    
     for i in range(epoch):
         running_loss = 0.0
         total = 0
@@ -401,7 +403,7 @@ def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train
         print("time:",time.time()-begin_time)
         train_loss.append(running_loss)
         
-        average_test_loss = testLoss(test_dataset,model,loss_fn,batch_size)
+        average_test_loss = testLoss(test_subset,model,loss_fn,batch_size)
         print('epoch:%d test loss: %.5f' %(i + 1, average_test_loss))
         print("time:",time.time()-begin_time)
         test_loss.append(test_loss)
@@ -411,7 +413,7 @@ def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train
 def testLoss(test_dataset,model,loss_fn,batch_size):
     model.eval()
     
-    test_generator = DataLoader(test_dataset, batch_size = batch_size,shuffle = True, num_workers = 2)
+    test_generator = DataLoader(test_dataset, batch_size = batch_size,shuffle = True, num_workers = 5)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     

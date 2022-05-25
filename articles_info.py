@@ -1,5 +1,5 @@
 import pandas as pd
-
+"""
 # df = pd.read_csv('/home/aymen/data/articles.csv',dtype={'article_id':str})
 df = pd.read_csv('./data/articles.csv',usecols=['article_id','product_group_name','product_type_name'],dtype={'article_id':str})
 tr_df = pd.read_csv('./data/transactions_train.csv',usecols=['article_id'],dtype={'article_id':str})
@@ -41,6 +41,10 @@ print('number of article in images__all is', len(im_set))
 # print('articles in images__all not in transactions_train.csv:', len(im_set - tr_set))
 
 # print('articles in transactions_train.csv not in aimages__all:', len(tr_set - im_set))
+"""
 
+tr_df = pd.read_csv('./data/transactions_train.csv',usecols=['article_id'],dtype={'article_id':str})
+top12 = tr_df['article_id'].value_counts()
+print(top12.head(12))
 
 
