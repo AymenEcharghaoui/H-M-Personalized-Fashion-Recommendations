@@ -11,6 +11,7 @@ import time
 import pickle
 import torch.utils.model_zoo as model_zoo
 
+
 # Ignore warnings
 # import warnings
 # warnings.filterwarnings("ignore")
@@ -366,7 +367,7 @@ class Model(torch.nn.Module):
 
 
 def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train_period) :
-    training_generator = DataLoader(train_dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
+    training_generator = DataLoader(train_dataset, batch_size = batch_size,shuffle = True, num_workers = 5)
     
     test_subset = torch.utils.data.Subset(test_dataset, list(range(2560)))
     
@@ -413,7 +414,7 @@ def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train
 def testLoss(test_dataset,model,loss_fn,batch_size):
     model.eval()
     
-    test_generator = DataLoader(test_dataset, batch_size = batch_size,shuffle = True, num_workers = 4)
+    test_generator = DataLoader(test_dataset, batch_size = batch_size,shuffle = True, num_workers = 5)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -589,3 +590,6 @@ if __name__ == '__main__':
 # (group2id,id2group,group_sizes) = creatArticlesDic('./data/articles_1month.csv')
 # print(group_sizes)
 # print(id2group)
+# import numpy as np
+# (group2id,id2group,group_sizes,datasets) = loadDatasets("")
+# print(np.mean(group_sizes))
