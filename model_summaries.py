@@ -126,9 +126,9 @@ if __name__ == '__main__':
     model1 = Model1(2000)
     model3 = alexnet(2000)
 
-    print(summary(model0, (3, 224, 224)))
+    print(summary(model0, (3, 224, 224).to(torch.device("cpu"))))
     print('\n')
-    print(summary(model1, (3, 224, 224)))
+    print(summary(model1, (3, 224, 224).to(torch.device("cpu"))))
     print('\n')
-    print(summary(model3, (3, 224, 224)))
+    print(summary(model3, (3, 224, 224).to(torch.device("cpu"))))
     print('\n')
