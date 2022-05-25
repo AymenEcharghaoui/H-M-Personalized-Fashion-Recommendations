@@ -123,12 +123,12 @@ def alexnet(num_classes, pretrained=False, **kwargs):
 
 if __name__ == '__main__':
     model0 = Model0(105100)
-    model1 = Model1(2000)
-    model3 = alexnet(2000)
+    model1 = Model1(2969)
+    model3 = alexnet(2969)
 
-    print(summary(model0, (3, 224, 224)))
+    print(summary(model0, (3, 224, 224),device='cpu'))
     print('\n')
-    print(summary(model1, (3, 224, 224)))
+    print(summary(model1, (3, 224, 224),device='cpu'))
     print('\n')
-    print(summary(model3, (3, 224, 224)))
+    print(summary(model3, (3, 224, 224),device='cpu'))
     print('\n')
