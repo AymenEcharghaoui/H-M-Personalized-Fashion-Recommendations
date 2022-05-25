@@ -6,6 +6,7 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
+from torchsummary import summary
 from torchvision import transforms
 import random
 import time
@@ -470,7 +471,7 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
 
     recommandations = {}
 
-
+    trans_art = {}
     '''
     # all customers : there are new customers in customers.csv
     customers = pd.read_csv(cust_dir,dtype={'article_id':str})
@@ -479,12 +480,13 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
         is_active[row['customer_id']] = False
     '''
 
+
+    
     # dealing with articles not present in transactions train
     # representatitive for all classes
     rep = []
     for i in range(len(group_sizes)):
-        img_name = os.path.join(images_dir,str(group2id[(0,0)])+'.jpg')
-        image = io.imread(img_name)
+        image = io.imread(os.path.join(images_dir,str(group2id[(i,0)])+'.jpg'))
         if transform:
             image = transform(image)
         image = image.to(device)
@@ -500,12 +502,15 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
     # making recommandations based on previous transactions
     transactions = pd.read_csv(tr_dir,dtype={'article_id':str})
 
-    seen = set()
+    
     for i,row in transactions.iterrows():
-        if(not(row['customer_id'] in seen)):
-            recommandations[row['customer_id']] = torch.zeros(num_articles,dtype=torch.float32)
-            seen.add(row['customer_id'])
+        if(not(row['customer_id'] in trans_art)):
+            trans_art[row['customer_id']] = {row['article_id']}
+        else:
+            trans_art[row['customer_id']].add(row['article_id'])
 
+
+    '''
     for i,row in transactions.iterrows():
 
         #assert row['customer_id'] in recommandations
@@ -530,6 +535,9 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
             else:
                 recommandations[row['customer_id']] += rep[group_index]
 
+    '''
+    
+
     submission_file = open(pred_dir,'w',newline='')
     # no worries of a second execution : we overwrite what's already existing in the submission file
 
@@ -544,9 +552,9 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
         customer = row['customer_id']
         line = [customer]
         articles = ""
-        reccs = recommandations[customer]
+        #reccs = recommandations[customer]
 
-        if(not(row['customer_id'] in seen)):
+        if(not(row['customer_id'] in trans_art)):
             '''
             # new customer : generate num_reccom random articles
             for _ in range(num_reccom-1):
@@ -557,7 +565,26 @@ def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_di
             articles = "0706016001 0706016002 0372860001 0610776002 0759871002 0464297007 0372860002 0610776001 0399223001 0706016003 0720125001 0156231001"
 
         else:
-            indices = reccs.topk(num_reccom).indices
+            label = torch.zeros(num_articles,dtype=torch.float32)
+            for article in trans_art[customer]:
+                group_index = id2group_all[article]
+                img_name = os.path.join(images_dir,str(article)+'.jpg')
+                if(os.path.exists(img_name)):
+                    if(article in id2group):
+                        image = io.imread(img_name)
+                        if transform:
+                            image = transform(image)
+                        image = image.to(device)
+                
+                        end = group_sizes_cumm[id2group[article][0]]
+                        start = end - group_sizes[id2group[article][0]]
+
+                        models[group_index].to(device)
+                        label[start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
+                        models[group_index].to(torch.device('cpu'))
+                    else:
+                        label += rep[group_index]
+            indices = label.topk(num_reccom).indices
             '''
             for i in range(num_reccom-1):
                 articles += os.listdir(images_dir)[indices[i]][:-4]+ " "
