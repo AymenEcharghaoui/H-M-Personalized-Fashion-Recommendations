@@ -1,0 +1,150 @@
+nohup: ignoring input
+Is cuda available? True
+creating dataset : --- 60.666088819503784 seconds ---
+dataset 0: --- 60.666131258010864 seconds ---
+epoch:1, period:5 running loss: 0.36678
+time: 249.18043088912964
+epoch:1, period:10 running loss: 0.05009
+time: 377.0763466358185
+epoch:1, period:15 running loss: 0.07026
+time: 500.5722758769989
+epoch:1, period:20 running loss: 0.06871
+time: 630.5452480316162
+epoch:1, period:25 running loss: 0.05504
+time: 863.145378112793
+epoch:1, period:30 running loss: 0.05082
+time: 1000.6561889648438
+epoch:1, period:35 running loss: 0.05236
+time: 1125.7175443172455
+epoch:1, period:40 running loss: 0.04479
+time: 1257.9530158042908
+epoch:1, period:45 running loss: 0.04151
+time: 1488.5361618995667
+epoch:1, period:50 running loss: 0.03785
+time: 1616.114109992981
+epoch:1, period:55 running loss: 0.03986
+time: 1742.4742670059204
+epoch:1 average loss: 0.10108
+time: 1858.732899904251
+epoch:2, period:5 running loss: 0.04073
+time: 2108.8444311618805
+epoch:2, period:10 running loss: 0.04089
+time: 2236.651674747467
+epoch:2, period:15 running loss: 0.03917
+time: 2363.3298790454865
+epoch:2, period:20 running loss: 0.03620
+time: 2488.338986158371
+epoch:2, period:25 running loss: 0.03573
+time: 2734.5541236400604
+epoch:2, period:30 running loss: 0.04156
+time: 2861.1807367801666
+epoch:2, period:35 running loss: 0.03905
+time: 2993.8867218494415
+epoch:2, period:40 running loss: 0.03560
+time: 3119.3404064178467
+epoch:2, period:45 running loss: 0.04036
+time: 3355.283945083618
+epoch:2, period:50 running loss: 0.04101
+time: 3477.4905350208282
+epoch:2, period:55 running loss: 0.03648
+time: 3620.1357679367065
+epoch:2 average loss: 0.03840
+time: 3715.4428503513336
+epoch:3, period:5 running loss: 0.03774
+time: 3964.79039812088
+epoch:3, period:10 running loss: 0.03694
+time: 4089.78289937973
+epoch:3, period:15 running loss: 0.03454
+time: 4214.208129167557
+epoch:3, period:20 running loss: 0.03648
+time: 4338.646962881088
+epoch:3, period:25 running loss: 0.03513
+time: 4581.176042318344
+epoch:3, period:30 running loss: 0.03673
+time: 4705.3840317726135
+epoch:3, period:35 running loss: 0.03775
+time: 4827.9319841861725
+epoch:3, period:40 running loss: 0.04345
+time: 4954.934335947037
+epoch:3, period:45 running loss: 0.04013
+time: 5193.216343402863
+epoch:3, period:50 running loss: 0.03642
+time: 5315.5696449279785
+epoch:3, period:55 running loss: 0.03401
+time: 5439.637548446655
+epoch:3 average loss: 0.03816
+time: 5555.287386894226
+epoch:4, period:5 running loss: 0.04542
+time: 5806.229455709457
+epoch:4, period:10 running loss: 0.04337
+time: 5932.607140779495
+epoch:4, period:15 running loss: 0.03640
+time: 6057.550985097885
+epoch:4, period:20 running loss: 0.03489
+time: 6183.924287319183
+epoch:4, period:25 running loss: 0.03546
+time: 6423.810542583466
+epoch:4, period:30 running loss: 0.03573
+time: 6549.471113443375
+epoch:4, period:35 running loss: 0.03576
+time: 6671.93750667572
+epoch:4, period:40 running loss: 0.03846
+time: 6794.732194185257
+epoch:4, period:45 running loss: 0.04069
+time: 7028.693111419678
+epoch:4, period:50 running loss: 0.04463
+time: 7160.312953710556
+epoch:4, period:55 running loss: 0.03831
+time: 7282.291937828064
+epoch:4 average loss: 0.03806
+time: 7383.488124132156
+epoch:5, period:5 running loss: 0.03293
+time: 7633.566835165024
+epoch:5, period:10 running loss: 0.04284
+time: 7758.5223960876465
+epoch:5, period:15 running loss: 0.03788
+time: 7884.997463226318
+epoch:5, period:20 running loss: 0.03855
+time: 8010.052683830261
+epoch:5, period:25 running loss: 0.04455
+time: 8257.04637169838
+epoch:5, period:30 running loss: 0.03666
+time: 8382.539371490479
+epoch:5, period:35 running loss: 0.03740
+time: 8511.327519416809
+epoch:5, period:40 running loss: 0.03848
+time: 8636.844160318375
+epoch:5, period:45 running loss: 0.03839
+time: 8885.573777198792
+epoch:5, period:50 running loss: 0.03476
+time: 9011.114604949951
+epoch:5, period:55 running loss: 0.04152
+time: 9138.056621789932
+epoch:5 average loss: 0.03797
+time: 9263.862298250198
+Traceback (most recent call last):
+  File "without_valid_train.py", line 535, in <module>
+    lossPlot(train_loss,loss_dir,i)
+  File "without_valid_train.py", line 470, in lossPlot
+    plt.plot(loss,label = "loss for training set")
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/pyplot.py", line 2757, in plot
+    return gca().plot(
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/pyplot.py", line 2262, in gca
+    return gcf().gca(**kwargs)
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/pyplot.py", line 846, in gcf
+    return figure()
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/pyplot.py", line 787, in figure
+    manager = new_figure_manager(
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/pyplot.py", line 306, in new_figure_manager
+    return _backend_mod.new_figure_manager(*args, **kwargs)
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/backend_bases.py", line 3494, in new_figure_manager
+    return cls.new_figure_manager_given_figure(num, fig)
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/backend_bases.py", line 3499, in new_figure_manager_given_figure
+    canvas = cls.FigureCanvas(figure)
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/backends/backend_qtagg.py", line 21, in __init__
+    super().__init__(figure=figure)
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/backends/backend_qt.py", line 220, in __init__
+    _create_qApp()
+  File "/anaconda/envs/py38_default/lib/python3.8/site-packages/matplotlib/backends/backend_qt.py", line 112, in _create_qApp
+    raise RuntimeError('Invalid DISPLAY variable')
+RuntimeError: Invalid DISPLAY variable

@@ -1,0 +1,1107 @@
+nohup: ignoring input
+Is cuda available? True
+creating dataset : --- 1.0734834671020508 seconds ---
+dataset 1: --- 1.0735292434692383 seconds ---
+epoch:1, period:5 running loss: 0.20517
+time: 251.4604058265686
+epoch:1, period:10 running loss: 0.05626
+time: 380.79627799987793
+epoch:1, period:15 running loss: 0.06133
+time: 509.94271183013916
+epoch:1, period:20 running loss: 0.07390
+time: 640.3979775905609
+epoch:1, period:25 running loss: 0.05519
+time: 866.8998403549194
+epoch:1, period:30 running loss: 0.04110
+time: 1026.7568335533142
+epoch:1, period:35 running loss: 0.04075
+time: 1155.3808197975159
+epoch:1, period:40 running loss: 0.03717
+time: 1283.2719893455505
+epoch:1, period:45 running loss: 0.03613
+time: 1481.669907093048
+epoch:1, period:50 running loss: 0.02890
+time: 1665.7470610141754
+epoch:1, period:55 running loss: 0.03052
+time: 1793.367653131485
+epoch:1 average loss: 0.08433
+time: 1848.1075415611267
+epoch:2, period:5 running loss: 0.02799
+time: 2101.804225921631
+epoch:2, period:10 running loss: 0.03440
+time: 2227.9863991737366
+epoch:2, period:15 running loss: 0.02829
+time: 2353.5620222091675
+epoch:2, period:20 running loss: 0.03523
+time: 2480.0159935951233
+epoch:2, period:25 running loss: 0.03158
+time: 2724.7306423187256
+epoch:2, period:30 running loss: 0.02987
+time: 2850.991519212723
+epoch:2, period:35 running loss: 0.03130
+time: 2976.190118074417
+epoch:2, period:40 running loss: 0.03463
+time: 3102.6770627498627
+epoch:2, period:45 running loss: 0.03204
+time: 3332.142053127289
+epoch:2, period:50 running loss: 0.03400
+time: 3478.8900327682495
+epoch:2, period:55 running loss: 0.03270
+time: 3604.415096759796
+epoch:2 average loss: 0.03211
+time: 3693.280853033066
+epoch:3, period:5 running loss: 0.03286
+time: 3944.607421398163
+epoch:3, period:10 running loss: 0.03506
+time: 4072.5111808776855
+epoch:3, period:15 running loss: 0.03128
+time: 4200.7826499938965
+epoch:3, period:20 running loss: 0.03618
+time: 4322.231069803238
+epoch:3, period:25 running loss: 0.03250
+time: 4567.039088487625
+epoch:3, period:30 running loss: 0.03004
+time: 4689.612085103989
+epoch:3, period:35 running loss: 0.02865
+time: 4812.961659193039
+epoch:3, period:40 running loss: 0.03846
+time: 4935.9064247608185
+epoch:3, period:45 running loss: 0.02671
+time: 5177.811482667923
+epoch:3, period:50 running loss: 0.02878
+time: 5300.693989753723
+epoch:3, period:55 running loss: 0.03232
+time: 5429.1339111328125
+epoch:3 average loss: 0.03201
+time: 5541.6481721401215
+epoch:4, period:5 running loss: 0.03441
+time: 5793.498846530914
+epoch:4, period:10 running loss: 0.03086
+time: 5918.274065732956
+epoch:4, period:15 running loss: 0.03354
+time: 6043.065968990326
+epoch:4, period:20 running loss: 0.03026
+time: 6171.044052600861
+epoch:4, period:25 running loss: 0.03704
+time: 6399.717746973038
+epoch:4, period:30 running loss: 0.03245
+time: 6544.411318063736
+epoch:4, period:35 running loss: 0.03380
+time: 6668.71272277832
+epoch:4, period:40 running loss: 0.03372
+time: 6790.483457803726
+epoch:4, period:45 running loss: 0.02898
+time: 7002.178439617157
+epoch:4, period:50 running loss: 0.02884
+time: 7152.773846626282
+epoch:4, period:55 running loss: 0.03278
+time: 7276.02472949028
+epoch:4 average loss: 0.03201
+time: 7361.299940824509
+epoch:5, period:5 running loss: 0.03223
+time: 7612.816887140274
+epoch:5, period:10 running loss: 0.03285
+time: 7736.6727504730225
+epoch:5, period:15 running loss: 0.03120
+time: 7862.77060341835
+epoch:5, period:20 running loss: 0.03033
+time: 7988.935952663422
+epoch:5, period:25 running loss: 0.03221
+time: 8237.27912569046
+epoch:5, period:30 running loss: 0.03279
+time: 8362.783333778381
+epoch:5, period:35 running loss: 0.03500
+time: 8487.73576760292
+epoch:5, period:40 running loss: 0.03189
+time: 8613.397602796555
+epoch:5, period:45 running loss: 0.03057
+time: 8864.775410413742
+epoch:5, period:50 running loss: 0.02550
+time: 8993.02164363861
+epoch:5, period:55 running loss: 0.03103
+time: 9114.518289089203
+epoch:5 average loss: 0.03201
+time: 9230.759050130844
+training 1: --- 9234.304122447968 seconds ---
+dataset 2: --- 9234.316062450409 seconds ---
+epoch:1, period:5 running loss: 0.42603
+time: 250.48004531860352
+epoch:1, period:10 running loss: 0.04765
+time: 375.78046107292175
+epoch:1, period:15 running loss: 0.05396
+time: 502.4369468688965
+epoch:1, period:20 running loss: 0.05659
+time: 627.5786530971527
+epoch:1, period:25 running loss: 0.05899
+time: 875.7195513248444
+epoch:1, period:30 running loss: 0.05377
+time: 1001.8159720897675
+epoch:1, period:35 running loss: 0.04481
+time: 1127.8081715106964
+epoch:1, period:40 running loss: 0.04185
+time: 1254.0019986629486
+epoch:1, period:45 running loss: 0.04312
+time: 1502.5197637081146
+epoch:1, period:50 running loss: 0.03321
+time: 1631.083750963211
+epoch:1, period:55 running loss: 0.03459
+time: 1756.3225605487823
+epoch:1 average loss: 0.10338
+time: 1875.5170209407806
+epoch:2, period:5 running loss: 0.03486
+time: 2126.9567902088165
+epoch:2, period:10 running loss: 0.03353
+time: 2253.306922197342
+epoch:2, period:15 running loss: 0.03118
+time: 2376.8687829971313
+epoch:2, period:20 running loss: 0.03406
+time: 2510.4427268505096
+epoch:2, period:25 running loss: 0.03526
+time: 2742.9122653007507
+epoch:2, period:30 running loss: 0.03231
+time: 2864.846618413925
+epoch:2, period:35 running loss: 0.03536
+time: 2987.259093284607
+epoch:2, period:40 running loss: 0.03343
+time: 3137.1668407917023
+epoch:2, period:45 running loss: 0.03761
+time: 3353.035620212555
+epoch:2, period:50 running loss: 0.02995
+time: 3475.2046880722046
+epoch:2, period:55 running loss: 0.03792
+time: 3597.336516857147
+epoch:2 average loss: 0.03499
+time: 3714.9448862075806
+epoch:3, period:5 running loss: 0.03692
+time: 3965.361836671829
+epoch:3, period:10 running loss: 0.03187
+time: 4091.2748222351074
+epoch:3, period:15 running loss: 0.03161
+time: 4217.543199777603
+epoch:3, period:20 running loss: 0.03546
+time: 4344.692200899124
+epoch:3, period:25 running loss: 0.03550
+time: 4602.264037132263
+epoch:3, period:30 running loss: 0.03484
+time: 4731.804610013962
+epoch:3, period:35 running loss: 0.03198
+time: 4857.662539720535
+epoch:3, period:40 running loss: 0.03377
+time: 4984.05980014801
+epoch:3, period:45 running loss: 0.03454
+time: 5233.954298496246
+epoch:3, period:50 running loss: 0.03495
+time: 5357.539036273956
+epoch:3, period:55 running loss: 0.03551
+time: 5481.633816480637
+epoch:3 average loss: 0.03487
+time: 5600.674155950546
+epoch:4, period:5 running loss: 0.03232
+time: 5852.476843595505
+epoch:4, period:10 running loss: 0.03720
+time: 5978.784489154816
+epoch:4, period:15 running loss: 0.03138
+time: 6103.538916826248
+epoch:4, period:20 running loss: 0.03908
+time: 6229.340285539627
+epoch:4, period:25 running loss: 0.03534
+time: 6464.18992805481
+epoch:4, period:30 running loss: 0.03425
+time: 6622.272063493729
+epoch:4, period:35 running loss: 0.03762
+time: 6753.33153128624
+epoch:4, period:40 running loss: 0.03583
+time: 6884.491539239883
+epoch:4, period:45 running loss: 0.03223
+time: 7071.741640806198
+epoch:4, period:50 running loss: 0.03162
+time: 7261.466576099396
+epoch:4, period:55 running loss: 0.03436
+time: 7383.377923250198
+epoch:4 average loss: 0.03486
+time: 7433.415817499161
+epoch:5, period:5 running loss: 0.03636
+time: 7681.27334856987
+epoch:5, period:10 running loss: 0.03669
+time: 7810.05721950531
+epoch:5, period:15 running loss: 0.03291
+time: 7935.836026668549
+epoch:5, period:20 running loss: 0.03803
+time: 8063.400586843491
+epoch:5, period:25 running loss: 0.03318
+time: 8288.22861623764
+epoch:5, period:30 running loss: 0.03458
+time: 8437.914223909378
+epoch:5, period:35 running loss: 0.03756
+time: 8563.511586904526
+epoch:5, period:40 running loss: 0.03411
+time: 8689.24578166008
+epoch:5, period:45 running loss: 0.03551
+time: 8892.756999015808
+epoch:5, period:50 running loss: 0.03358
+time: 9042.342051267624
+epoch:5, period:55 running loss: 0.03460
+time: 9196.666090011597
+epoch:5 average loss: 0.03485
+time: 9249.413783073425
+training 2: --- 18483.905735969543 seconds ---
+dataset 3: --- 18483.920152902603 seconds ---
+epoch:1, period:5 running loss: 0.21786
+time: 251.5772008895874
+epoch:1, period:10 running loss: 0.05594
+time: 376.93448424339294
+epoch:1, period:15 running loss: 0.06093
+time: 501.66218066215515
+epoch:1, period:20 running loss: 0.07172
+time: 625.8484606742859
+epoch:1, period:25 running loss: 0.05721
+time: 874.2166802883148
+epoch:1, period:30 running loss: 0.04986
+time: 995.8440110683441
+epoch:1, period:35 running loss: 0.04166
+time: 1118.7899239063263
+epoch:1, period:40 running loss: 0.04545
+time: 1240.8809943199158
+epoch:1, period:45 running loss: 0.03716
+time: 1486.364690542221
+epoch:1, period:50 running loss: 0.03069
+time: 1609.7578570842743
+epoch:1, period:55 running loss: 0.03611
+time: 1729.6063668727875
+epoch:1 average loss: 0.08706
+time: 1847.1772527694702
+epoch:2, period:5 running loss: 0.03522
+time: 2103.410227060318
+epoch:2, period:10 running loss: 0.03081
+time: 2230.0041420459747
+epoch:2, period:15 running loss: 0.03061
+time: 2355.718356847763
+epoch:2, period:20 running loss: 0.03625
+time: 2480.994345188141
+epoch:2, period:25 running loss: 0.03544
+time: 2730.4326360225677
+epoch:2, period:30 running loss: 0.03187
+time: 2852.0652940273285
+epoch:2, period:35 running loss: 0.03751
+time: 2972.503798007965
+epoch:2, period:40 running loss: 0.03649
+time: 3093.2992520332336
+epoch:2, period:45 running loss: 0.03272
+time: 3337.2784531116486
+epoch:2, period:50 running loss: 0.03717
+time: 3460.7522542476654
+epoch:2, period:55 running loss: 0.03420
+time: 3582.4797003269196
+epoch:2 average loss: 0.03422
+time: 3700.734517097473
+epoch:3, period:5 running loss: 0.03287
+time: 3949.459331512451
+epoch:3, period:10 running loss: 0.03724
+time: 4079.685921192169
+epoch:3, period:15 running loss: 0.03606
+time: 4205.316878795624
+epoch:3, period:20 running loss: 0.03418
+time: 4330.305442810059
+epoch:3, period:25 running loss: 0.03048
+time: 4561.692739248276
+epoch:3, period:30 running loss: 0.03072
+time: 4705.729488134384
+epoch:3, period:35 running loss: 0.03664
+time: 4830.63787484169
+epoch:3, period:40 running loss: 0.03171
+time: 4951.3170337677
+epoch:3, period:45 running loss: 0.03648
+time: 5167.53093457222
+epoch:3, period:50 running loss: 0.03521
+time: 5311.734723567963
+epoch:3, period:55 running loss: 0.03887
+time: 5431.8958377838135
+epoch:3 average loss: 0.03410
+time: 5525.505600690842
+epoch:4, period:5 running loss: 0.03619
+time: 5775.561623811722
+epoch:4, period:10 running loss: 0.03827
+time: 5901.365657567978
+epoch:4, period:15 running loss: 0.03416
+time: 6027.815407276154
+epoch:4, period:20 running loss: 0.03217
+time: 6152.924834012985
+epoch:4, period:25 running loss: 0.03319
+time: 6385.284388542175
+epoch:4, period:30 running loss: 0.03787
+time: 6529.084023237228
+epoch:4, period:35 running loss: 0.03299
+time: 6653.2325527668
+epoch:4, period:40 running loss: 0.03280
+time: 6778.5372796058655
+epoch:4, period:45 running loss: 0.02979
+time: 7001.968536615372
+epoch:4, period:50 running loss: 0.03416
+time: 7150.520677566528
+epoch:4, period:55 running loss: 0.03376
+time: 7271.103558301926
+epoch:4 average loss: 0.03408
+time: 7361.946897268295
+epoch:5, period:5 running loss: 0.03389
+time: 7616.071521997452
+epoch:5, period:10 running loss: 0.03450
+time: 7745.8055284023285
+epoch:5, period:15 running loss: 0.03594
+time: 7878.870654582977
+epoch:5, period:20 running loss: 0.03243
+time: 8012.113121509552
+epoch:5, period:25 running loss: 0.03336
+time: 8252.734907865524
+epoch:5, period:30 running loss: 0.03116
+time: 8376.166003227234
+epoch:5, period:35 running loss: 0.03645
+time: 8517.95755982399
+epoch:5, period:40 running loss: 0.02931
+time: 8640.205278635025
+epoch:5, period:45 running loss: 0.03686
+time: 8859.104472875595
+epoch:5, period:50 running loss: 0.03747
+time: 8984.370683670044
+epoch:5, period:55 running loss: 0.03358
+time: 9129.199884653091
+epoch:5 average loss: 0.03407
+time: 9217.807538509369
+training 3: --- 27701.837379217148 seconds ---
+dataset 4: --- 27701.84742617607 seconds ---
+epoch:1, period:5 running loss: 0.16847
+time: 250.98514485359192
+epoch:1, period:10 running loss: 0.05859
+time: 375.893661737442
+epoch:1, period:15 running loss: 0.06656
+time: 500.5425691604614
+epoch:1, period:20 running loss: 0.06542
+time: 626.5681958198547
+epoch:1, period:25 running loss: 0.05375
+time: 878.4265329837799
+epoch:1, period:30 running loss: 0.04497
+time: 1003.5696213245392
+epoch:1, period:35 running loss: 0.03937
+time: 1131.293003320694
+epoch:1, period:40 running loss: 0.03681
+time: 1256.283390045166
+epoch:1, period:45 running loss: 0.03626
+time: 1505.418817281723
+epoch:1, period:50 running loss: 0.03531
+time: 1630.8141782283783
+epoch:1, period:55 running loss: 0.03111
+time: 1753.8698751926422
+epoch:1 average loss: 0.08467
+time: 1875.5800051689148
+epoch:2, period:5 running loss: 0.03741
+time: 2126.3373789787292
+epoch:2, period:10 running loss: 0.03412
+time: 2251.5208694934845
+epoch:2, period:15 running loss: 0.03490
+time: 2376.5436305999756
+epoch:2, period:20 running loss: 0.03575
+time: 2501.5942459106445
+epoch:2, period:25 running loss: 0.03593
+time: 2748.7079191207886
+epoch:2, period:30 running loss: 0.03372
+time: 2872.1052713394165
+epoch:2, period:35 running loss: 0.03086
+time: 2994.255893945694
+epoch:2, period:40 running loss: 0.03209
+time: 3116.052584171295
+epoch:2, period:45 running loss: 0.03464
+time: 3358.6854853630066
+epoch:2, period:50 running loss: 0.03599
+time: 3480.7310152053833
+epoch:2, period:55 running loss: 0.03308
+time: 3601.5889055728912
+epoch:2 average loss: 0.03394
+time: 3719.439739227295
+epoch:3, period:5 running loss: 0.03144
+time: 3966.795610666275
+epoch:3, period:10 running loss: 0.03234
+time: 4090.7265679836273
+epoch:3, period:15 running loss: 0.03245
+time: 4221.531950712204
+epoch:3, period:20 running loss: 0.03306
+time: 4346.613162994385
+epoch:3, period:25 running loss: 0.03509
+time: 4571.697838544846
+epoch:3, period:30 running loss: 0.03515
+time: 4697.499503612518
+epoch:3, period:35 running loss: 0.03400
+time: 4832.692383527756
+epoch:3, period:40 running loss: 0.03056
+time: 4958.329260110855
+epoch:3, period:45 running loss: 0.03371
+time: 5174.8052678108215
+epoch:3, period:50 running loss: 0.03217
+time: 5306.601960897446
+epoch:3, period:55 running loss: 0.03260
+time: 5442.096206903458
+epoch:3 average loss: 0.03382
+time: 5537.271972179413
+epoch:4, period:5 running loss: 0.03722
+time: 5789.555008649826
+epoch:4, period:10 running loss: 0.03073
+time: 5916.563084125519
+epoch:4, period:15 running loss: 0.02935
+time: 6041.498090744019
+epoch:4, period:20 running loss: 0.03260
+time: 6167.164926767349
+epoch:4, period:25 running loss: 0.03200
+time: 6419.267512559891
+epoch:4, period:30 running loss: 0.02987
+time: 6540.647068977356
+epoch:4, period:35 running loss: 0.03447
+time: 6660.257168769836
+epoch:4, period:40 running loss: 0.03705
+time: 6786.999429941177
+epoch:4, period:45 running loss: 0.03224
+time: 7021.926586389542
+epoch:4, period:50 running loss: 0.03485
+time: 7142.4115035533905
+epoch:4, period:55 running loss: 0.03314
+time: 7262.997922182083
+epoch:4 average loss: 0.03381
+time: 7379.449939727783
+epoch:5, period:5 running loss: 0.03221
+time: 7630.532888412476
+epoch:5, period:10 running loss: 0.03098
+time: 7757.3899538517
+epoch:5, period:15 running loss: 0.03687
+time: 7882.476620197296
+epoch:5, period:20 running loss: 0.03312
+time: 8004.476819038391
+epoch:5, period:25 running loss: 0.03477
+time: 8235.158431768417
+epoch:5, period:30 running loss: 0.03420
+time: 8368.320462942123
+epoch:5, period:35 running loss: 0.03466
+time: 8491.474199533463
+epoch:5, period:40 running loss: 0.03718
+time: 8615.313451051712
+epoch:5, period:45 running loss: 0.03373
+time: 8837.665630102158
+epoch:5, period:50 running loss: 0.03123
+time: 8974.323336601257
+epoch:5, period:55 running loss: 0.03314
+time: 9107.290105104446
+epoch:5 average loss: 0.03378
+time: 9198.093876361847
+training 4: --- 36900.12082242966 seconds ---
+dataset 5: --- 36900.13619470596 seconds ---
+epoch:1, period:5 running loss: 0.46197
+time: 252.67767238616943
+epoch:1, period:10 running loss: 0.03945
+time: 378.99951434135437
+epoch:1, period:15 running loss: 0.07265
+time: 504.69570994377136
+epoch:1, period:20 running loss: 0.06490
+time: 631.1209864616394
+epoch:1, period:25 running loss: 0.05858
+time: 876.3792576789856
+epoch:1, period:30 running loss: 0.04372
+time: 997.4131979942322
+epoch:1, period:35 running loss: 0.03738
+time: 1126.9473731517792
+epoch:1, period:40 running loss: 0.03734
+time: 1259.2829761505127
+epoch:1, period:45 running loss: 0.03244
+time: 1486.4188604354858
+epoch:1, period:50 running loss: 0.03524
+time: 1606.428092956543
+epoch:1, period:55 running loss: 0.03264
+time: 1741.9283096790314
+epoch:1 average loss: 0.10294
+time: 1845.4814813137054
+epoch:2, period:5 running loss: 0.02865
+time: 2096.5478117465973
+epoch:2, period:10 running loss: 0.03387
+time: 2229.078538417816
+epoch:2, period:15 running loss: 0.03065
+time: 2356.3174197673798
+epoch:2, period:20 running loss: 0.02985
+time: 2477.758159637451
+epoch:2, period:25 running loss: 0.03301
+time: 2714.6980748176575
+epoch:2, period:30 running loss: 0.03084
+time: 2842.2599461078644
+epoch:2, period:35 running loss: 0.03135
+time: 2963.0736451148987
+epoch:2, period:40 running loss: 0.02899
+time: 3084.9541194438934
+epoch:2, period:45 running loss: 0.02866
+time: 3326.601683139801
+epoch:2, period:50 running loss: 0.03156
+time: 3449.022984981537
+epoch:2, period:55 running loss: 0.03007
+time: 3571.475509405136
+epoch:2 average loss: 0.03067
+time: 3690.586112976074
+epoch:3, period:5 running loss: 0.03080
+time: 3940.754960536957
+epoch:3, period:10 running loss: 0.03115
+time: 4065.468934774399
+epoch:3, period:15 running loss: 0.03191
+time: 4190.531296491623
+epoch:3, period:20 running loss: 0.02828
+time: 4312.316859006882
+epoch:3, period:25 running loss: 0.03000
+time: 4551.772529840469
+epoch:3, period:30 running loss: 0.02780
+time: 4673.273685455322
+epoch:3, period:35 running loss: 0.03590
+time: 4794.950690031052
+epoch:3, period:40 running loss: 0.02782
+time: 4917.221213340759
+epoch:3, period:45 running loss: 0.03058
+time: 5154.2381637096405
+epoch:3, period:50 running loss: 0.03328
+time: 5277.435600042343
+epoch:3, period:55 running loss: 0.03152
+time: 5397.962002515793
+epoch:3 average loss: 0.03023
+time: 5511.670204162598
+epoch:4, period:5 running loss: 0.02954
+time: 5764.554093837738
+epoch:4, period:10 running loss: 0.03124
+time: 5887.260169744492
+epoch:4, period:15 running loss: 0.03088
+time: 6008.986236333847
+epoch:4, period:20 running loss: 0.03180
+time: 6132.071337938309
+epoch:4, period:25 running loss: 0.02936
+time: 6369.764681100845
+epoch:4, period:30 running loss: 0.03245
+time: 6496.420869112015
+epoch:4, period:35 running loss: 0.03061
+time: 6617.6535885334015
+epoch:4, period:40 running loss: 0.02989
+time: 6738.8083918094635
+epoch:4, period:45 running loss: 0.02998
+time: 6982.430143594742
+epoch:4, period:50 running loss: 0.03032
+time: 7103.624254703522
+epoch:4, period:55 running loss: 0.03016
+time: 7224.76938867569
+epoch:4 average loss: 0.03013
+time: 7339.194357633591
+epoch:5, period:5 running loss: 0.03153
+time: 7590.569964885712
+epoch:5, period:10 running loss: 0.02894
+time: 7714.725979804993
+epoch:5, period:15 running loss: 0.02934
+time: 7841.648308992386
+epoch:5, period:20 running loss: 0.02668
+time: 7970.62268781662
+epoch:5, period:25 running loss: 0.02863
+time: 8217.987547636032
+epoch:5, period:30 running loss: 0.02701
+time: 8342.038744449615
+epoch:5, period:35 running loss: 0.02911
+time: 8465.623681783676
+epoch:5, period:40 running loss: 0.02648
+time: 8598.04858827591
+epoch:5, period:45 running loss: 0.03026
+time: 8830.327450037003
+epoch:5, period:50 running loss: 0.02954
+time: 8952.364940404892
+epoch:5, period:55 running loss: 0.03068
+time: 9075.29130101204
+epoch:5 average loss: 0.03006
+time: 9194.102826356888
+training 5: --- 46094.33958983421 seconds ---
+dataset 6: --- 46094.34991669655 seconds ---
+epoch:1, period:5 running loss: 0.11246
+time: 248.388441324234
+epoch:1, period:10 running loss: 0.05578
+time: 376.28406143188477
+epoch:1, period:15 running loss: 0.08779
+time: 501.4472379684448
+epoch:1, period:20 running loss: 0.06267
+time: 625.7501685619354
+epoch:1, period:25 running loss: 0.04453
+time: 869.6876873970032
+epoch:1, period:30 running loss: 0.03690
+time: 1001.8715677261353
+epoch:1, period:35 running loss: 0.03697
+time: 1122.6113059520721
+epoch:1, period:40 running loss: 0.03151
+time: 1243.341549396515
+epoch:1, period:45 running loss: 0.03189
+time: 1478.9729273319244
+epoch:1, period:50 running loss: 0.02960
+time: 1604.797324180603
+epoch:1, period:55 running loss: 0.02646
+time: 1726.2706944942474
+epoch:1 average loss: 0.07699
+time: 1839.4544093608856
+epoch:2, period:5 running loss: 0.02882
+time: 2089.7170045375824
+epoch:2, period:10 running loss: 0.03060
+time: 2215.7790157794952
+epoch:2, period:15 running loss: 0.02583
+time: 2342.3706665039062
+epoch:2, period:20 running loss: 0.03028
+time: 2467.6444685459137
+epoch:2, period:25 running loss: 0.02365
+time: 2721.2245247364044
+epoch:2, period:30 running loss: 0.02926
+time: 2846.3033335208893
+epoch:2, period:35 running loss: 0.02819
+time: 2971.010011911392
+epoch:2, period:40 running loss: 0.02490
+time: 3095.778621673584
+epoch:2, period:45 running loss: 0.03004
+time: 3345.364760160446
+epoch:2, period:50 running loss: 0.02781
+time: 3471.171217918396
+epoch:2, period:55 running loss: 0.02573
+time: 3598.0366168022156
+epoch:2 average loss: 0.02843
+time: 3718.8468692302704
+epoch:3, period:5 running loss: 0.02891
+time: 3968.893583059311
+epoch:3, period:10 running loss: 0.02709
+time: 4101.388545036316
+epoch:3, period:15 running loss: 0.02566
+time: 4225.40279507637
+epoch:3, period:20 running loss: 0.02640
+time: 4349.809765815735
+epoch:3, period:25 running loss: 0.02915
+time: 4598.77227973938
+epoch:3, period:30 running loss: 0.02967
+time: 4726.160937309265
+epoch:3, period:35 running loss: 0.03016
+time: 4851.204878330231
+epoch:3, period:40 running loss: 0.02734
+time: 4976.912939786911
+epoch:3, period:45 running loss: 0.03076
+time: 5223.430351734161
+epoch:3, period:50 running loss: 0.02661
+time: 5350.192293643951
+epoch:3, period:55 running loss: 0.02750
+time: 5474.544302225113
+epoch:3 average loss: 0.02817
+time: 5595.346330881119
+epoch:4, period:5 running loss: 0.02703
+time: 5848.143357753754
+epoch:4, period:10 running loss: 0.02359
+time: 5974.95977973938
+epoch:4, period:15 running loss: 0.02786
+time: 6101.720141887665
+epoch:4, period:20 running loss: 0.02359
+time: 6228.8451590538025
+epoch:4, period:25 running loss: 0.02812
+time: 6480.8216462135315
+epoch:4, period:30 running loss: 0.02785
+time: 6606.745519399643
+epoch:4, period:35 running loss: 0.02727
+time: 6734.013483762741
+epoch:4, period:40 running loss: 0.03041
+time: 6861.443911314011
+epoch:4, period:45 running loss: 0.02705
+time: 7106.74410533905
+epoch:4, period:50 running loss: 0.02817
+time: 7227.9779806137085
+epoch:4, period:55 running loss: 0.02837
+time: 7349.510331630707
+epoch:4 average loss: 0.02804
+time: 7467.295437335968
+epoch:5, period:5 running loss: 0.02696
+time: 7722.074952125549
+epoch:5, period:10 running loss: 0.02640
+time: 7848.02666759491
+epoch:5, period:15 running loss: 0.03028
+time: 7975.299497842789
+epoch:5, period:20 running loss: 0.02852
+time: 8100.620323896408
+epoch:5, period:25 running loss: 0.02979
+time: 8353.06412577629
+epoch:5, period:30 running loss: 0.02787
+time: 8479.385140657425
+epoch:5, period:35 running loss: 0.02796
+time: 8603.225985765457
+epoch:5, period:40 running loss: 0.02829
+time: 8725.62825679779
+epoch:5, period:45 running loss: 0.02651
+time: 8967.865108966827
+epoch:5, period:50 running loss: 0.02893
+time: 9088.681762456894
+epoch:5, period:55 running loss: 0.03132
+time: 9209.07770729065
+epoch:5 average loss: 0.02797
+time: 9326.721080303192
+training 6: --- 55421.2772629261 seconds ---
+dataset 7: --- 55421.29589009285 seconds ---
+epoch:1, period:5 running loss: 0.34474
+time: 263.22110295295715
+epoch:1, period:10 running loss: 0.02193
+time: 402.0671486854553
+epoch:1, period:15 running loss: 0.04271
+time: 539.5051760673523
+epoch:1, period:20 running loss: 0.04221
+time: 677.6942837238312
+epoch:1, period:25 running loss: 0.04325
+time: 952.9927356243134
+epoch:1, period:30 running loss: 0.03658
+time: 1091.5699455738068
+epoch:1, period:35 running loss: 0.03493
+time: 1229.3829202651978
+epoch:1, period:40 running loss: 0.02605
+time: 1356.0932657718658
+epoch:1, period:45 running loss: 0.02779
+time: 1608.6640017032623
+epoch:1, period:50 running loss: 0.02596
+time: 1736.233000278473
+epoch:1, period:55 running loss: 0.02346
+time: 1861.10014462471
+epoch:1 average loss: 0.08192
+time: 1981.93337225914
+epoch:2, period:5 running loss: 0.01983
+time: 2233.752374649048
+epoch:2, period:10 running loss: 0.02144
+time: 2358.7517874240875
+epoch:2, period:15 running loss: 0.02111
+time: 2484.225186109543
+epoch:2, period:20 running loss: 0.02006
+time: 2610.803638935089
+epoch:2, period:25 running loss: 0.01958
+time: 2855.205665588379
+epoch:2, period:30 running loss: 0.02085
+time: 2981.0578167438507
+epoch:2, period:35 running loss: 0.01876
+time: 3104.0636076927185
+epoch:2, period:40 running loss: 0.02088
+time: 3228.4445836544037
+epoch:2, period:45 running loss: 0.02036
+time: 3469.3844952583313
+epoch:2, period:50 running loss: 0.01891
+time: 3598.6450123786926
+epoch:2, period:55 running loss: 0.01810
+time: 3720.335500717163
+epoch:2 average loss: 0.02041
+time: 3828.904210329056
+epoch:3, period:5 running loss: 0.01929
+time: 4079.8343176841736
+epoch:3, period:10 running loss: 0.01985
+time: 4210.121276140213
+epoch:3, period:15 running loss: 0.02225
+time: 4360.1598489284515
+epoch:3, period:20 running loss: 0.01998
+time: 4495.557519197464
+epoch:3, period:25 running loss: 0.02457
+time: 4705.293070077896
+epoch:3, period:30 running loss: 0.01919
+time: 4850.910377025604
+epoch:3, period:35 running loss: 0.01777
+time: 4999.232200145721
+epoch:3, period:40 running loss: 0.01986
+time: 5123.382391452789
+epoch:3, period:45 running loss: 0.01939
+time: 5328.286494255066
+epoch:3, period:50 running loss: 0.01974
+time: 5488.170698404312
+epoch:3, period:55 running loss: 0.01872
+time: 5615.727381944656
+epoch:3 average loss: 0.02019
+time: 5698.349027633667
+epoch:4, period:5 running loss: 0.01950
+time: 5952.501620531082
+epoch:4, period:10 running loss: 0.02031
+time: 6080.375815153122
+epoch:4, period:15 running loss: 0.02066
+time: 6208.016199827194
+epoch:4, period:20 running loss: 0.01863
+time: 6334.944212436676
+epoch:4, period:25 running loss: 0.02017
+time: 6589.414589643478
+epoch:4, period:30 running loss: 0.01998
+time: 6717.399914741516
+epoch:4, period:35 running loss: 0.01994
+time: 6844.041348457336
+epoch:4, period:40 running loss: 0.01997
+time: 6967.523243665695
+epoch:4, period:45 running loss: 0.01984
+time: 7214.7562375068665
+epoch:4, period:50 running loss: 0.02205
+time: 7337.0859887599945
+epoch:4, period:55 running loss: 0.01738
+time: 7459.057189464569
+epoch:4 average loss: 0.02017
+time: 7578.346248149872
+epoch:5, period:5 running loss: 0.02046
+time: 7829.350311517715
+epoch:5, period:10 running loss: 0.01900
+time: 7957.320098400116
+epoch:5, period:15 running loss: 0.01777
+time: 8085.427180767059
+epoch:5, period:20 running loss: 0.02076
+time: 8212.972535848618
+epoch:5, period:25 running loss: 0.01885
+time: 8446.347882986069
+epoch:5, period:30 running loss: 0.01804
+time: 8602.703699350357
+epoch:5, period:35 running loss: 0.01914
+time: 8731.08011007309
+epoch:5, period:40 running loss: 0.01857
+time: 8859.239161729813
+epoch:5, period:45 running loss: 0.02355
+time: 9058.806424617767
+epoch:5, period:50 running loss: 0.01919
+time: 9241.921520709991
+epoch:5, period:55 running loss: 0.01905
+time: 9368.705067157745
+epoch:5 average loss: 0.02017
+time: 9420.233031988144
+training 7: --- 64841.661405563354 seconds ---
+dataset 8: --- 64841.67395067215 seconds ---
+epoch:1, period:5 running loss: 0.41346
+time: 250.59534358978271
+epoch:1, period:10 running loss: 0.02903
+time: 378.4062271118164
+epoch:1, period:15 running loss: 0.04396
+time: 506.29394721984863
+epoch:1, period:20 running loss: 0.05272
+time: 632.1139483451843
+epoch:1, period:25 running loss: 0.04631
+time: 864.697900056839
+epoch:1, period:30 running loss: 0.03669
+time: 1003.9126076698303
+epoch:1, period:35 running loss: 0.02929
+time: 1127.5373878479004
+epoch:1, period:40 running loss: 0.03487
+time: 1250.98961353302
+epoch:1, period:45 running loss: 0.02585
+time: 1479.1029388904572
+epoch:1, period:50 running loss: 0.02395
+time: 1624.6859538555145
+epoch:1, period:55 running loss: 0.02782
+time: 1745.0087385177612
+epoch:1 average loss: 0.08966
+time: 1848.401032924652
+epoch:2, period:5 running loss: 0.02394
+time: 2100.2726740837097
+epoch:2, period:10 running loss: 0.02453
+time: 2223.2958884239197
+epoch:2, period:15 running loss: 0.02094
+time: 2353.9138877391815
+epoch:2, period:20 running loss: 0.02443
+time: 2482.797744989395
+epoch:2, period:25 running loss: 0.02331
+time: 2712.8265895843506
+epoch:2, period:30 running loss: 0.02322
+time: 2843.7780952453613
+epoch:2, period:35 running loss: 0.02642
+time: 2982.212748527527
+epoch:2, period:40 running loss: 0.02495
+time: 3114.843338727951
+epoch:2, period:45 running loss: 0.02215
+time: 3325.627350330353
+epoch:2, period:50 running loss: 0.02027
+time: 3455.4457392692566
+epoch:2, period:55 running loss: 0.01946
+time: 3611.477766752243
+epoch:2 average loss: 0.02273
+time: 3690.8259756565094
+epoch:3, period:5 running loss: 0.02409
+time: 3944.1866579055786
+epoch:3, period:10 running loss: 0.02208
+time: 4069.952481031418
+epoch:3, period:15 running loss: 0.02552
+time: 4215.397283315659
+epoch:3, period:20 running loss: 0.02179
+time: 4348.223743677139
+epoch:3, period:25 running loss: 0.02258
+time: 4566.310612678528
+epoch:3, period:30 running loss: 0.02293
+time: 4700.60672545433
+epoch:3, period:35 running loss: 0.02405
+time: 4882.712045669556
+epoch:3, period:40 running loss: 0.02278
+time: 5018.55543589592
+epoch:3, period:45 running loss: 0.02326
+time: 5188.218983411789
+epoch:3, period:50 running loss: 0.02268
+time: 5329.212677955627
+epoch:3, period:55 running loss: 0.02401
+time: 5549.063104152679
+epoch:3 average loss: 0.02227
+time: 5555.055362462997
+epoch:4, period:5 running loss: 0.02409
+time: 5805.014584064484
+epoch:4, period:10 running loss: 0.02209
+time: 5931.960635900497
+epoch:4, period:15 running loss: 0.02173
+time: 6056.4962067604065
+epoch:4, period:20 running loss: 0.02306
+time: 6182.905854463577
+epoch:4, period:25 running loss: 0.02188
+time: 6420.670560598373
+epoch:4, period:30 running loss: 0.02178
+time: 6542.202241897583
+epoch:4, period:35 running loss: 0.02088
+time: 6675.4107234478
+epoch:4, period:40 running loss: 0.02119
+time: 6801.042833805084
+epoch:4, period:45 running loss: 0.02142
+time: 7025.56737279892
+epoch:4, period:50 running loss: 0.02181
+time: 7154.391106128693
+epoch:4, period:55 running loss: 0.02243
+time: 7290.497406959534
+epoch:4 average loss: 0.02222
+time: 7385.1209881305695
+epoch:5, period:5 running loss: 0.02414
+time: 7639.179765701294
+epoch:5, period:10 running loss: 0.02299
+time: 7763.8549156188965
+epoch:5, period:15 running loss: 0.02317
+time: 7887.7122802734375
+epoch:5, period:20 running loss: 0.02206
+time: 8013.290030241013
+epoch:5, period:25 running loss: 0.02279
+time: 8261.529826641083
+epoch:5, period:30 running loss: 0.02183
+time: 8385.35861325264
+epoch:5, period:35 running loss: 0.02238
+time: 8508.360392093658
+epoch:5, period:40 running loss: 0.02004
+time: 8631.259694576263
+epoch:5, period:45 running loss: 0.02416
+time: 8879.527269601822
+epoch:5, period:50 running loss: 0.02147
+time: 9002.315923690796
+epoch:5, period:55 running loss: 0.02122
+time: 9125.055568695068
+epoch:5 average loss: 0.02220
+time: 9247.114421844482
+training 8: --- 74088.88541865349 seconds ---
+dataset 9: --- 74088.89617156982 seconds ---
+epoch:1, period:5 running loss: 0.36855
+time: 251.85824179649353
+epoch:1, period:10 running loss: 0.05275
+time: 380.68285155296326
+epoch:1, period:15 running loss: 0.07425
+time: 509.84559869766235
+epoch:1, period:20 running loss: 0.07085
+time: 637.4862501621246
+epoch:1, period:25 running loss: 0.06342
+time: 887.9183113574982
+epoch:1, period:30 running loss: 0.05223
+time: 1010.9274432659149
+epoch:1, period:35 running loss: 0.04439
+time: 1134.2625699043274
+epoch:1, period:40 running loss: 0.04314
+time: 1257.112600326538
+epoch:1, period:45 running loss: 0.03957
+time: 1504.4111049175262
+epoch:1, period:50 running loss: 0.03694
+time: 1625.9379069805145
+epoch:1, period:55 running loss: 0.03738
+time: 1746.2898902893066
+epoch:1 average loss: 0.10180
+time: 1864.6954035758972
+epoch:2, period:5 running loss: 0.03978
+time: 2116.9598712921143
+epoch:2, period:10 running loss: 0.03457
+time: 2245.4581043720245
+epoch:2, period:15 running loss: 0.03909
+time: 2372.6484475135803
+epoch:2, period:20 running loss: 0.03359
+time: 2493.450962781906
+epoch:2, period:25 running loss: 0.03333
+time: 2737.928131580353
+epoch:2, period:30 running loss: 0.03869
+time: 2860.0284445285797
+epoch:2, period:35 running loss: 0.03727
+time: 2986.944435596466
+epoch:2, period:40 running loss: 0.03937
+time: 3118.258893728256
+epoch:2, period:45 running loss: 0.03458
+time: 3353.559859752655
+epoch:2, period:50 running loss: 0.03834
+time: 3475.8374586105347
+epoch:2, period:55 running loss: 0.03925
+time: 3597.746611595154
+epoch:2 average loss: 0.03684
+time: 3716.819233417511
+epoch:3, period:5 running loss: 0.03507
+time: 3971.2340981960297
+epoch:3, period:10 running loss: 0.03994
+time: 4094.3399879932404
+epoch:3, period:15 running loss: 0.03425
+time: 4218.2899758815765
+epoch:3, period:20 running loss: 0.03683
+time: 4340.9228937625885
+epoch:3, period:25 running loss: 0.03465
+time: 4582.290604829788
+epoch:3, period:30 running loss: 0.03595
+time: 4711.017612934113
+epoch:3, period:35 running loss: 0.03681
+time: 4834.476033210754
+epoch:3, period:40 running loss: 0.03346
+time: 4957.290029287338
+epoch:3, period:45 running loss: 0.04035
+time: 5193.413806676865
+epoch:3, period:50 running loss: 0.03625
+time: 5326.207295656204
+epoch:3, period:55 running loss: 0.03658
+time: 5449.448806762695
+epoch:3 average loss: 0.03643
+time: 5551.851074695587
+epoch:4, period:5 running loss: 0.03897
+time: 5808.880603790283
+epoch:4, period:10 running loss: 0.03276
+time: 5939.249472379684
+epoch:4, period:15 running loss: 0.03545
+time: 6067.58295083046
+epoch:4, period:20 running loss: 0.03389
+time: 6196.075657367706
+epoch:4, period:25 running loss: 0.03530
+time: 6453.344153642654
+epoch:4, period:30 running loss: 0.03326
+time: 6581.959158420563
+epoch:4, period:35 running loss: 0.03753
+time: 6710.714608192444
+epoch:4, period:40 running loss: 0.03806
+time: 6836.374618291855
+epoch:4, period:45 running loss: 0.03671
+time: 7078.773964881897
+epoch:4, period:50 running loss: 0.03494
+time: 7200.357839345932
+epoch:4, period:55 running loss: 0.03449
+time: 7321.85160446167
+epoch:4 average loss: 0.03631
+time: 7441.749629020691
+epoch:5, period:5 running loss: 0.03480
+time: 7693.275859594345
+epoch:5, period:10 running loss: 0.03768
+time: 7818.247356176376
+epoch:5, period:15 running loss: 0.03917
+time: 7944.550589561462
+epoch:5, period:20 running loss: 0.03597
+time: 8071.754894018173
+epoch:5, period:25 running loss: 0.03856
+time: 8317.288170814514
+epoch:5, period:30 running loss: 0.03494
+time: 8439.81731247902
+epoch:5, period:35 running loss: 0.03871
+time: 8563.268322229385
+epoch:5, period:40 running loss: 0.03521
+time: 8687.632815361023
+epoch:5, period:45 running loss: 0.04098
+time: 8932.397067308426
+epoch:5, period:50 running loss: 0.03437
+time: 9054.845375537872
+epoch:5, period:55 running loss: 0.04297
+time: 9179.896290779114
+epoch:5 average loss: 0.03624
+time: 9301.86057305336
+training 9: --- 83390.89532351494 seconds ---
+Traceback (most recent call last):
+  File "without_valid_train.py", line 549, in <module>
+    predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,num_articles=num_articles,transform=myTransform)
+  File "without_valid_train.py", line 393, in predictions
+    assert group_sizes_cumm[-1] == num_articles
+AssertionError
