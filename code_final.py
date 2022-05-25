@@ -642,7 +642,7 @@ if __name__ == '__main__':
     models = []
     for i in range(len(group_sizes)):
         model = Model(group_length=group_sizes[i])
-        model.load_state_dict(torch.load("model"+str(i)+".pt"))
+        model.load_state_dict(torch.load(graph_dir+"model"+str(i)+".pt"))
         model.eval()
         models.append(model)
     
