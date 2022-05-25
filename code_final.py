@@ -269,7 +269,7 @@ class Model(torch.nn.Module):
         self.conv3 = torch.nn.Conv2d(4,5,kernel_size=3,stride=1,padding=1)
         self.pool4 = torch.nn.MaxPool2d(kernel_size=4,stride=4,padding=0)
         self.dense5 = torch.nn.Linear(5*14*14,int(group_length/2))
-        self.batchNorm = torch.nn.BatchNorm1d(int(group_length/2))
+        #self.batchNorm = torch.nn.BatchNorm1d(int(group_length/2))
         self.dense6 = torch.nn.Linear(int(group_length/2),group_length)
         self.activation = activation
 
