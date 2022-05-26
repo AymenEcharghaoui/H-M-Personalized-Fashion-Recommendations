@@ -11,6 +11,7 @@ import time
 import pickle
 import torch.utils.model_zoo as model_zoo
 
+
 # Ignore warnings
 # import warnings
 # warnings.filterwarnings("ignore")
@@ -543,14 +544,14 @@ if __name__ == '__main__':
     
     myTransform = transforms.Compose([Rescale(256),RandomCrop(224),ToTensor(),transforms.Normalize((0.5,), (0.5,))])
     
-    (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
-    saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
+    # (group2id,id2group,group_sizes,datasets,relevant,id_relevant) = creatDataset(images_dir, articles_dir, transactions_dir_train, transform = myTransform)
+    # saveDatasets(group2id, id2group, group_sizes, relevant, id_relevant)
     (group2id,id2group,group_sizes,datasets) = loadDatasets(images_dir,transform=myTransform)
     print("creating train dataset : --- %s seconds ---" % (time.time() - start_time))
     print("number of train dataset: ", len(datasets[0]))
     
-    (test_datasets,test_relevant,test_id_relevant) = creatTestDataset(images_dir, group2id,id2group,group_sizes, transactions_dir_test, transform = myTransform)
-    saveDatasets(group2id, id2group, group_sizes, test_relevant, test_id_relevant, isTrain=False)
+    # (test_datasets,test_relevant,test_id_relevant) = creatTestDataset(images_dir, group2id,id2group,group_sizes, transactions_dir_test, transform = myTransform)
+    # saveDatasets(group2id, id2group, group_sizes, test_relevant, test_id_relevant, isTrain=False)
     (group2id,id2group,group_sizes,test_datasets) = loadDatasets(images_dir,transform=myTransform, isTrain=False)
     print("creating test dataset : --- %s seconds ---" % (time.time() - start_time))
     print("number of test dataset: ", len(test_datasets[0]))
@@ -589,3 +590,6 @@ if __name__ == '__main__':
 # (group2id,id2group,group_sizes) = creatArticlesDic('./data/articles_1month.csv')
 # print(group_sizes)
 # print(id2group)
+# import numpy as np
+# (group2id,id2group,group_sizes,datasets) = loadDatasets("")
+# print(np.mean(group_sizes))
