@@ -533,6 +533,8 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                 start = end - group_sizes[i]
                 recommandations[row['customer_id']][start:end] = models[i](image.unsqueeze(0)).squeeze(0).to('cpu')
                 models[i].to(torch.device('cpu'))
+            image.to(torch.device('cpu'))
+            torch.cuda.empty_cache()
 
     transactions_test = pd.read_csv(tr_dir_valid,dtype={'article_id':str})
 
