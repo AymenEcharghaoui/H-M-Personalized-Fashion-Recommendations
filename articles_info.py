@@ -43,8 +43,9 @@ print('number of article in images__all is', len(im_set))
 # print('articles in transactions_train.csv not in aimages__all:', len(tr_set - im_set))
 """
 
-tr_df = pd.read_csv('./data/transactions_train.csv',usecols=['article_id'],dtype={'article_id':str})
-top12 = tr_df['article_id'].value_counts()
-print(top12.head(12))
+tr_df = pd.read_csv('./data/transactions_train_train1month.csv',usecols=['customer_id'],dtype={'article_id':str})
+# top12 = tr_df['customer_id'].value_counts()
+# print(top12.head(12))
+print(tr_df['customer_id'].value_counts())
 
 

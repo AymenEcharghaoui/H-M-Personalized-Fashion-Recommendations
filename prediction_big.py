@@ -323,7 +323,7 @@ def score(tr_dir,pred_dir,num_recomm=12):
     map12 /= count_customers
     return map12
 
-def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,pred_dir,images_dir,num_reccom=12,transform=None) :
+def bigPredictions(models,id2group,group2id,group_sizes,tr_dir_all,cust_dir,pred_dir,images_dir,num_reccom=12,transform=None) :
     
     """
     store a sample submission csv file in pred_dir
@@ -340,6 +340,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         pred_dir (string): directory of the submission file
         images_dir (string): Directory with all the images.
     """
+    begin_time = time.time()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     for i in range(len(models)):
@@ -356,38 +357,49 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
 
     # looking at only a subset of customers
     # create transactions dictionary {customer: a set of all articles he has bought}
-    transactions_df = pd.read_csv(tr_dir_train, usecols=['customer_id','article_id'], dtype={'article_id':str})
+    transactions_df = pd.read_csv(tr_dir_all, usecols=['customer_id','article_id'], dtype={'article_id':str})
     
     transactions = {}
     for i,row in transactions_df.iterrows():
         customer = row['customer_id']
         article = row['article_id']
         if customer not in transactions:
-            transactions[customer] = {article}
+            transactions[customer] = {}
+            transactions[customer][article] = 1
         else:
-            transactions[customer].add(article)
+            if article not in transactions[customer]:
+                transactions[customer][article] = 1
+            else:
+                transactions[customer][article] += 1
+    
+    for key,value in transactions.items():
+        value = sorted(value.items(),key=(lambda x: -x[1]))[:20]
+        transactions[key] = value
 
+    print("creat transaction dic, time:",time.time()-begin_time)
+    
     submission_file = open(pred_dir,'w',newline='')
     submission = csv.writer(submission_file,delimiter=',')
     submission.writerow(['customer_id','prediction'])
     
     
-    customers_df = pd.read_csv(tr_dir_train, usecols=['customer_id'])
+    customers_df = pd.read_csv(cust_dir, usecols=['customer_id'])
     customers_list = customers_df['customer_id'].unique()
     
     num_new_customer = 0
-    for customer in customers_list:
+    for k,customer in enumerate(customers_list):
         
         if customer not in transactions:
             # new customer : do nothing
             num_new_customer += 1
+            articles = "0706016001 0706016002 0372860001 0610776002 0759871002 0464297007 0372860002 0610776001 0399223001 0706016003 0720125001 0156231001"
         else:
             # a customer seen in transactions
             with torch.no_grad():
                 recommandation = torch.zeros(num_articles,dtype=torch.float32)
                 recommandation.to(device)
                 
-                for article in transactions[customer]:
+                for article,_ in transactions[customer]:
                     img_name = os.path.join(images_dir, article + '.jpg')
                     if os.path.exists(img_name):
                         
@@ -418,7 +430,10 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                     articles += group2id[(j,index)]+ " "
                 articles = articles[:-1]
                 
-                submission.writerow([customer,articles])
+        submission.writerow([customer,articles])
+        if k % 1000 == 1000-1:
+            print('%d customers predicted' %(k + 1))
+            print("time:",time.time()-begin_time)
                      
     submission_file.close()
     print("number of new customer", num_new_customer, "total customer", len(customers_list))
@@ -464,6 +479,3 @@ if __name__ == '__main__':
             pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
-
-    map12 = score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm)
-    print("map@12:", map12)

@@ -340,6 +340,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         pred_dir (string): directory of the submission file
         images_dir (string): Directory with all the images.
     """
+    begin_time = time.time()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     for i in range(len(models)):
@@ -366,6 +367,8 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
             transactions[customer] = {article}
         else:
             transactions[customer].add(article)
+    
+    print("creat transaction dic, time:",time.time()-begin_time)
 
     submission_file = open(pred_dir,'w',newline='')
     submission = csv.writer(submission_file,delimiter=',')
@@ -376,7 +379,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
     customers_list = customers_df['customer_id'].unique()
     
     num_new_customer = 0
-    for customer in customers_list:
+    for k,customer in enumerate(customers_list):
         
         if customer not in transactions:
             # new customer : do nothing
@@ -418,7 +421,10 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                     articles += group2id[(j,index)]+ " "
                 articles = articles[:-1]
                 
-                submission.writerow([customer,articles])
+        if k % 1000 == 1000-1:
+            print('%d customers predicted' %(k + 1))
+            print("time:",time.time()-begin_time)
+        submission.writerow([customer,articles])
                      
     submission_file.close()
     print("number of new customer", num_new_customer, "total customer", len(customers_list))
