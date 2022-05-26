@@ -466,5 +466,4 @@ if __name__ == '__main__':
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
 
     map12 = score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm)
-    print("calculating map@12 : --- %s seconds ---" % (time.time() - start_time))
     print("map@12:", map12)
