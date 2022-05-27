@@ -342,7 +342,6 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
     """
     begin_time = time.time()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(device)
     
     for i in range(len(models)):
         models[i].eval()
@@ -388,8 +387,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         else:
             # a customer seen in transactions
             with torch.no_grad():
-                recommandation = torch.zeros(num_articles,dtype=torch.float32)
-                recommandation.to(device)
+                recommandation = torch.zeros(num_articles,device=device)
                 print("recom:",recommandation.device)
                 
                 for article in transactions[customer]:
