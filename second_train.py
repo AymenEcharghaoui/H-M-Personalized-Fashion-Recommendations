@@ -557,7 +557,7 @@ if __name__ == '__main__':
     print("number of test dataset: ", len(test_datasets[0]))
 
     # models = []
-    for i in range(1, len(group_sizes)):
+    for i in range(0, 1):
 
         model_submit_dir = './data/second_try_model'+str(i)+'.pt'
 
