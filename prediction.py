@@ -364,9 +364,17 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         customer = row['customer_id']
         article = row['article_id']
         if customer not in transactions:
-            transactions[customer] = {article}
+            transactions[customer] = {}
+            transactions[customer][article] = 1
         else:
-            transactions[customer].add(article)
+            if article not in transactions[customer]:
+                transactions[customer][article] = 1
+            else:
+                transactions[customer][article] += 1
+    
+    for key,value in transactions.items():
+        value = sorted(value.items(),key=(lambda x: -x[1]))[:20]
+        transactions[key] = value
     
     print("creat transaction dic, time:",time.time()-begin_time)
 
@@ -420,11 +428,11 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                     articles += group2id[(j,index)]+ " "
                 articles = articles[:-1]
                 
-        if k % 1000 == 1000-1:
+        submission.writerow([customer,articles])        
+        if k % 100 == 100-1:
             print('%d customers predicted' %(k + 1))
             print("time:",time.time()-begin_time)
-        submission.writerow([customer,articles])
-                     
+        
     submission_file.close()
     print("number of new customer", num_new_customer, "total customer", len(customers_list))
 
