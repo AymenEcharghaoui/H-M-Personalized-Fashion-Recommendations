@@ -407,7 +407,7 @@ def trainer(train_dataset,test_dataset,model,loss_fn,batch_size,epoch,rate,train
         average_test_loss = testLoss(test_subset,model,loss_fn,batch_size)
         print('epoch:%d test loss: %.5f' %(i + 1, average_test_loss))
         print("time:",time.time()-begin_time)
-        test_loss.append(test_loss)
+        test_loss.append(average_test_loss)
         
     return train_loss, test_loss
     

@@ -160,7 +160,37 @@ class ArticlesDataset(Dataset):
             return (self.transform(image),label)
         
         return (image,label)
+    
+class PredictionDataset(Dataset):
 
+    def __init__(self, group_id, images_dir, group_size, articles_set ,transform=None):
+        self.group_id = group_id
+        self.images_dir = images_dir
+        self.group_size = group_size
+        self.transform = transform
+        
+        self.length = len(articles_set)
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+
+        article_id = self.id_relevant[idx]
+        img_name = os.path.join(self.images_dir,article_id+'.jpg')
+        image = io.imread(img_name)
+
+        label_images = self.relevant[article_id]
+        label = torch.zeros(self.group_size, dtype=torch.float32)
+
+        for (group_id, id_in_group) in label_images:
+            if(group_id == self.group_id):
+                label[id_in_group] = 1
+        
+        if self.transform:
+            return (self.transform(image),label)
+        
+        return (image,label)
 
 class Rescale(object):
     """Rescale the image in a sample to a given size.
