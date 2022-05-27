@@ -448,7 +448,7 @@ if __name__ == '__main__':
     articles_dir = '/home/Biao/data/articles_1month.csv'
     customers_dir = '/home/Biao/data/customers.csv'
     predictions_dir = '/home/Biao/data/submission.csv'
-    graph_dir = '/home/Biao/data/'
+    graph_dir = '/home/Biao/H-M-Personalized-Fashion-Recommendations/data/'
     
     batch_size = 64
     max_epoch = 10
