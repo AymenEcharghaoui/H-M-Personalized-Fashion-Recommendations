@@ -388,7 +388,6 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
             # a customer seen in transactions
             with torch.no_grad():
                 recommandation = torch.zeros(num_articles,device=device)
-                print("recom:",recommandation.device)
                 
                 for article in transactions[customer]:
                     img_name = os.path.join(images_dir, article + '.jpg')
@@ -403,7 +402,6 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                         for i in range(len(models)):
                             end = group_sizes_cumm[i]
                             start = end - group_sizes[i]
-                            print("recom:",recommandation.device)
                             recommandation[start:end] += models[i](image.unsqueeze(0)).squeeze(0)
                             
                 recommandation.to("cpu")
