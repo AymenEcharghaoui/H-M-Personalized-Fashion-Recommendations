@@ -6,6 +6,7 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
+from torchsummary import summary
 from torchvision import transforms
 import random
 import time
@@ -430,8 +431,7 @@ def score(tr_dir,pred_dir,num_recomm=12):
             relevant = 0
             for i in range(num_recomm):
                 if(reccomandations[i] in transactions[customer_id]):
-                    print(customer_id+"  GT values : "+str(transactions[customer_id])+" Predictions : ")
-                    print(reccomandations)
+                    print(customer_id+"  GT values : "+str(transactions[customer_id])+" Predictions : "+str(reccomandations[i]))
                     relevant += 1
                     average_precision += relevant/(i+1)
             average_precision /= min(12,len(transactions[customer_id]))
@@ -439,7 +439,7 @@ def score(tr_dir,pred_dir,num_recomm=12):
     map12 /= count_customers
     return map12
 
-def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,pred_dir,images_dir,num_reccom=12,transform=None) :
+def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,images_dir,num_reccom=12,transform=None) :
     
     """
     store a sample submission csv file in pred_dir
@@ -471,7 +471,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
 
     recommandations = {}
 
-
+    trans_art = {}
     '''
     # all customers : there are new customers in customers.csv
     customers = pd.read_csv(cust_dir,dtype={'article_id':str})
@@ -480,7 +480,8 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         is_active[row['customer_id']] = False
     '''
 
-    '''
+
+    
     # dealing with articles not present in transactions train
     # representatitive for all classes
     rep = []
@@ -489,8 +490,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         while(not(os.path.exists(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg')))):
             p+=1
             assert (p<group_sizes[i])
-        img_name = os.path.join(images_dir,str(group2id[(i,p)])+'.jpg')
-        image = io.imread(img_name)
+        image = io.imread(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg'))
         if transform:
             image = transform(image)
         image = image.to(device)
@@ -501,40 +501,46 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         label[start:end] += models[i](image.unsqueeze(0)).squeeze(0).to('cpu')
         rep.append(label)
         models[i].to(torch.device('cpu'))
-    '''
 
     # looking at only a subset of customers
     # making recommandations based on previous transactions
-    transactions = pd.read_csv(tr_dir_train,dtype={'article_id':str})
+    transactions = pd.read_csv(tr_dir,dtype={'article_id':str})
 
-    seen = set()
+    
     for i,row in transactions.iterrows():
-        if(not(row['customer_id'] in seen)):
-            recommandations[row['customer_id']] = torch.zeros(num_articles,dtype=torch.float32)
-            seen.add(row['customer_id'])
+        if(not(row['customer_id'] in trans_art)):
+            trans_art[row['customer_id']] = {row['article_id']}
+        else:
+            trans_art[row['customer_id']].add(row['article_id'])
 
+
+    '''
     for i,row in transactions.iterrows():
 
         #assert row['customer_id'] in recommandations
 
         image_id = row['article_id']
-        group_index = id2group[image_id][0]
+        group_index = id2group_all[image_id]
         img_name = os.path.join(images_dir,str(image_id)+'.jpg')
         if(os.path.exists(img_name)):
-            image = io.imread(img_name)
-            if transform:
-                image = transform(image)
-            image = image.to(device)
-            #start = sum(group_sizes[:id2group[image_id][0]])
-            #end = start + group_sizes[id2group[image_id][0]]
-            for i in range(len(group_sizes)):
-                models[i].to(device)
-                end = group_sizes_cumm[i]
-                start = end - group_sizes[i]
-                recommandations[row['customer_id']][start:end] = models[i](image.unsqueeze(0)).squeeze(0).to('cpu')
-                models[i].to(torch.device('cpu'))
+            if(image_id in id2group):
+                image = io.imread(img_name)
+                if transform:
+                    image = transform(image)
+                image = image.to(device)
+                #start = sum(group_sizes[:id2group[image_id][0]])
+                #end = start + group_sizes[id2group[image_id][0]]
+                end = group_sizes_cumm[id2group[image_id][0]]
+                start = end - group_sizes[id2group[image_id][0]]
 
-    transactions_test = pd.read_csv(tr_dir_valid,dtype={'article_id':str})
+                models[group_index].to(device)
+                recommandations[row['customer_id']][start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
+                models[group_index].to(torch.device('cpu'))
+            else:
+                recommandations[row['customer_id']] += rep[group_index]
+
+    '''
+    
 
     submission_file = open(pred_dir,'w',newline='')
     # no worries of a second execution : we overwrite what's already existing in the submission file
@@ -544,15 +550,15 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
     submission.writerow(['customer_id','prediction'])
 
 
-    #customers = pd.read_csv(cust_dir,dtype={'article_id':str})
-    for i,row in transactions.iterrows():
+    customers = pd.read_csv(cust_dir,dtype={'article_id':str})
+    for i,row in customers.iterrows():
     #for customer in recommandations:
         customer = row['customer_id']
         line = [customer]
         articles = ""
-        reccs = recommandations[customer]
+        #reccs = recommandations[customer]
 
-        if(not(row['customer_id'] in seen)):
+        if(not(row['customer_id'] in trans_art)):
             '''
             # new customer : generate num_reccom random articles
             for _ in range(num_reccom-1):
@@ -563,7 +569,26 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
             articles = "0706016001 0706016002 0372860001 0610776002 0759871002 0464297007 0372860002 0610776001 0399223001 0706016003 0720125001 0156231001"
 
         else:
-            indices = reccs.topk(num_reccom).indices
+            label = torch.zeros(num_articles,dtype=torch.float32)
+            for article in trans_art[customer]:
+                group_index = id2group_all[article]
+                img_name = os.path.join(images_dir,str(article)+'.jpg')
+                if(os.path.exists(img_name)):
+                    if(article in id2group):
+                        image = io.imread(img_name)
+                        if transform:
+                            image = transform(image)
+                        image = image.to(device)
+                
+                        end = group_sizes_cumm[id2group[article][0]]
+                        start = end - group_sizes[id2group[article][0]]
+
+                        models[group_index].to(device)
+                        label[start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
+                        models[group_index].to(torch.device('cpu'))
+                    else:
+                        label += rep[group_index]
+            indices = label.topk(num_reccom).indices
             '''
             for i in range(num_reccom-1):
                 articles += os.listdir(images_dir)[indices[i]][:-4]+ " "
@@ -583,16 +608,6 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
 
         line.append(articles)
         submission.writerow(line,)
-
-    
-    for i,row in transactions_test.iterrows():
-    #for customer in recommandations:
-        customer = row['customer_id']
-        line = [customer]
-        articles = "0706016001 0706016002 0372860001 0610776002 0759871002 0464297007 0372860002 0610776001 0399223001 0706016003 0720125001 0156231001"   
-        line.append(articles)
-        submission.writerow(line,)
-
 
     submission_file.close()
 
@@ -701,11 +716,9 @@ if __name__ == '__main__':
     
     group2id,id2group,group_sizes,train_datasets = loadDatasets(images_dir=images_dir,transform=myTransform)
 
-    '''
     id2group_all = articles2groups(articles_dir=articles_dir)
     with open("id2group_all.pkl", "wb") as f:
         pickle.dump(id2group_all,f,protocol=pickle.HIGHEST_PROTOCOL)
-    '''
 
     '''
     models = []
@@ -743,8 +756,8 @@ if __name__ == '__main__':
         models.append(model)
     
     # change in tr_dir 
-    predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,\
-            num_reccom=num_recomm,tr_dir_train=transactions_dir_train,tr_dir_valid=transactions_dir_valid,\
+    predictions(models,id2group_all=id2group_all,id2group=id2group,group2id=group2id,group_sizes=group_sizes,\
+            num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,\
             pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
