@@ -403,6 +403,8 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                         for i in range(len(models)):
                             end = group_sizes_cumm[i]
                             start = end - group_sizes[i]
+                            print("recom:",recommandation.device)
+                            print("model",models[i].device)
                             recommandation[start:end] += models[i](image.unsqueeze(0)).squeeze(0)
                             
                 recommandation.to("cpu")
