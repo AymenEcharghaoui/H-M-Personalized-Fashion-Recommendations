@@ -342,6 +342,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
     """
     begin_time = time.time()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
     
     for i in range(len(models)):
         models[i].eval()
