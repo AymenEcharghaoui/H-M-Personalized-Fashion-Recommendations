@@ -6,6 +6,7 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
+from torchsummary import summary
 from torchvision import transforms
 import random
 import time
@@ -127,6 +128,55 @@ def createArticlesDic(articles_dir):
         group_sizes[group_id] += 1
         
     return (group2id,id2group,group_sizes)
+
+def articles2groups(articles_dir):
+    # based on all articles in articles.csv
+
+    articles_df = pd.read_csv(articles_dir, usecols=['article_id','product_type_name','product_group_name'], dtype={'article_id':str})
+    
+    group_sizes = [0]*10 #list of group sizes(#Ai)
+
+    id2group = {}
+    for i,row in articles_df.iterrows():
+        article = row['article_id']
+        
+        if row['product_group_name'] == 'Garment Upper body':
+            if row['product_type_name'] == 'Sweater':
+                group_id = 0
+            elif row['product_type_name'] == 'T-shirt' or \
+                row['product_type_name'] == 'Vest top':
+                group_id = 1
+            elif row['product_type_name'] == 'Top' or \
+                row['product_type_name'] == 'Blouse' or \
+                row['product_type_name'] == 'Jacket':
+                group_id = 2
+            else:
+                group_id = 3
+        
+        elif row['product_group_name'] == 'Garment Lower body':
+            if row['product_type_name'] == 'Trousers':
+                group_id = 4
+            else:
+                group_id = 5
+                
+        
+        elif row['product_group_name'] == 'Garment Full body':
+            group_id = 6
+        
+        elif row['product_group_name'] == 'Accessories':
+            group_id = 7
+        
+        elif row['product_group_name'] == 'Shoes' or \
+            row['product_group_name'] == 'Socks & Tights' or \
+            row['product_group_name'] == 'Nightwear':
+            group_id = 8
+            
+        else:
+            group_id = 9
+        
+        id2group[article] = group_id
+        
+    return id2group
 
 class ArticlesDataset(Dataset):
 
@@ -253,11 +303,6 @@ def loadDatasets(images_dir, transform=None):
         datasets.append(ArticlesDataset(i,images_dir,group_sizes[i],relevant,id_relevant,transform=transform))
     
     return (group2id,id2group,group_sizes,datasets)
-        
-def loadModel(model_dir):
-    with open(model_dir, "rb") as f:
-        model = pickle.load(f)
-    return model
 
 
 class Model(torch.nn.Module):
@@ -282,7 +327,7 @@ class Model(torch.nn.Module):
         z = self.pool4(z)
         z = z.view(z.size(0),-1)
         z = self.dense5(z)
-        z = self.batchNorm(z)
+        #z = self.batchNorm(z)
         z = self.activation(z)
         z = self.dense6(z)
 
@@ -386,6 +431,7 @@ def score(tr_dir,pred_dir,num_recomm=12):
             relevant = 0
             for i in range(num_recomm):
                 if(reccomandations[i] in transactions[customer_id]):
+                    print(customer_id+"  GT values : "+str(transactions[customer_id])+" Predictions : "+str(reccomandations[i]))
                     relevant += 1
                     average_precision += relevant/(i+1)
             average_precision /= min(12,len(transactions[customer_id]))
@@ -393,16 +439,20 @@ def score(tr_dir,pred_dir,num_recomm=12):
     map12 /= count_customers
     return map12
 
-def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,images_dir,num_reccom=12,transform=None) :
+def predictions(models,id2group_all,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,images_dir,num_reccom=12,transform=None) :
+    
     """
     store a sample submission csv file in pred_dir
     Args :
         models : DL models for each group of articles after being trained on the whole dataset
+
         id2group (dict): article_id -> (group_index,index in group) 
         group2id (dict): (group_index,index in group) -> article_id
         group_sizes (list): group_index -> size of this group
+
         tr_dir (string): directory of transactions_train.csv
         cust_dir (string): directory of customers.csv
+
         pred_dir (string): directory of the submission file
         images_dir (string): Directory with all the images.
     """
@@ -421,7 +471,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
 
     recommandations = {}
 
-
+    trans_art = {}
     '''
     # all customers : there are new customers in customers.csv
     customers = pd.read_csv(cust_dir,dtype={'article_id':str})
@@ -430,36 +480,67 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
         is_active[row['customer_id']] = False
     '''
 
+
+    
+    # dealing with articles not present in transactions train
+    # representatitive for all classes
+    rep = []
+    for i in range(len(group_sizes)):
+        p = 0
+        while(not(os.path.exists(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg')))):
+            p+=1
+            assert (p<group_sizes[i])
+        image = io.imread(os.path.join(images_dir,str(group2id[(i,p)])+'.jpg'))
+        if transform:
+            image = transform(image)
+        image = image.to(device)
+        models[i].to(device)
+        end = group_sizes_cumm[i]
+        start = end - group_sizes[i]
+        label = torch.zeros(num_articles,dtype=torch.float32)
+        label[start:end] += models[i](image.unsqueeze(0)).squeeze(0).to('cpu')
+        rep.append(label)
+        models[i].to(torch.device('cpu'))
+
     # looking at only a subset of customers
     # making recommandations based on previous transactions
     transactions = pd.read_csv(tr_dir,dtype={'article_id':str})
 
-    seen = set()
+    
     for i,row in transactions.iterrows():
-        if(not(row['customer_id'] in seen)):
-            recommandations[row['customer_id']] = torch.zeros(num_articles,dtype=torch.float32)
-            seen.add(row['customer_id'])
+        if(not(row['customer_id'] in trans_art)):
+            trans_art[row['customer_id']] = {row['article_id']}
+        else:
+            trans_art[row['customer_id']].add(row['article_id'])
 
+
+    '''
     for i,row in transactions.iterrows():
 
-        assert row['customer_id'] in recommandations
+        #assert row['customer_id'] in recommandations
 
         image_id = row['article_id']
-        group_index = id2group[image_id][0]
-        img_name = os.path.join(images_dir,'0'+str(image_id)+'.jpg')
+        group_index = id2group_all[image_id]
+        img_name = os.path.join(images_dir,str(image_id)+'.jpg')
         if(os.path.exists(img_name)):
-            image = io.imread(img_name)
-            if transform:
-                image = transform(image)
-            image = image.to(device)
-            #start = sum(group_sizes[:id2group[image_id][0]])
-            #end = start + group_sizes[id2group[image_id][0]]
-            end = group_sizes_cumm[id2group[image_id][0]]
-            start = end - group_sizes[id2group[image_id][0]]
+            if(image_id in id2group):
+                image = io.imread(img_name)
+                if transform:
+                    image = transform(image)
+                image = image.to(device)
+                #start = sum(group_sizes[:id2group[image_id][0]])
+                #end = start + group_sizes[id2group[image_id][0]]
+                end = group_sizes_cumm[id2group[image_id][0]]
+                start = end - group_sizes[id2group[image_id][0]]
 
-            models[group_index].to(device)
-            recommandations[row['customer_id']][start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
-            models[group_index].to(torch.device('cpu'))
+                models[group_index].to(device)
+                recommandations[row['customer_id']][start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
+                models[group_index].to(torch.device('cpu'))
+            else:
+                recommandations[row['customer_id']] += rep[group_index]
+
+    '''
+    
 
     submission_file = open(pred_dir,'w',newline='')
     # no worries of a second execution : we overwrite what's already existing in the submission file
@@ -468,23 +549,46 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir,cust_dir,pred_dir,im
 
     submission.writerow(['customer_id','prediction'])
 
-    #for i,row in customers.iterrows():
-    for customer in recommandations:
+
+    customers = pd.read_csv(cust_dir,dtype={'article_id':str})
+    for i,row in customers.iterrows():
+    #for customer in recommandations:
+        customer = row['customer_id']
         line = [customer]
         articles = ""
-        reccs = recommandations[customer]
+        #reccs = recommandations[customer]
 
-        if(not(row['customer_id'] in seen)):
+        if(not(row['customer_id'] in trans_art)):
             '''
             # new customer : generate num_reccom random articles
             for _ in range(num_reccom-1):
                 articles += os.listdir(images_dir)[random.randint(0,num_articles-1)][:-4]+" "
             articles += os.listdir(images_dir)[random.randint(0,num_articles-1)][:-4]
             '''
-            continue
+            #continue
+            articles = "0706016001 0706016002 0372860001 0610776002 0759871002 0464297007 0372860002 0610776001 0399223001 0706016003 0720125001 0156231001"
 
         else:
-            indices = reccs.topk(num_reccom).indices
+            label = torch.zeros(num_articles,dtype=torch.float32)
+            for article in trans_art[customer]:
+                group_index = id2group_all[article]
+                img_name = os.path.join(images_dir,str(article)+'.jpg')
+                if(os.path.exists(img_name)):
+                    if(article in id2group):
+                        image = io.imread(img_name)
+                        if transform:
+                            image = transform(image)
+                        image = image.to(device)
+                
+                        end = group_sizes_cumm[id2group[article][0]]
+                        start = end - group_sizes[id2group[article][0]]
+
+                        models[group_index].to(device)
+                        label[start:end] += models[group_index](image.unsqueeze(0)).squeeze(0).to('cpu')
+                        models[group_index].to(torch.device('cpu'))
+                    else:
+                        label += rep[group_index]
+            indices = label.topk(num_reccom).indices
             '''
             for i in range(num_reccom-1):
                 articles += os.listdir(images_dir)[indices[i]][:-4]+ " "
@@ -611,6 +715,11 @@ if __name__ == '__main__':
 
     
     group2id,id2group,group_sizes,train_datasets = loadDatasets(images_dir=images_dir,transform=myTransform)
+
+    id2group_all = articles2groups(articles_dir=articles_dir)
+    with open("id2group_all.pkl", "wb") as f:
+        pickle.dump(id2group_all,f,protocol=pickle.HIGHEST_PROTOCOL)
+
     '''
     models = []
     for i in range(len(group_sizes)):
@@ -647,11 +756,14 @@ if __name__ == '__main__':
         models.append(model)
     
     # change in tr_dir 
-    predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,num_reccom=num_recomm,tr_dir=transactions_dir_train,cust_dir=customers_dir,pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
+    predictions(models,id2group_all=id2group_all,id2group=id2group,group2id=group2id,group_sizes=group_sizes,\
+            num_reccom=num_recomm,tr_dir=transactions_dir,cust_dir=customers_dir,\
+            pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
 
-    print(score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm))
+    map = score(tr_dir=transactions_dir_valid,pred_dir=predictions_dir,num_recomm=num_recomm)
+    print(map)
 
     '''
     to load models : 
