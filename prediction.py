@@ -397,7 +397,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
             with torch.no_grad():
                 recommandation = torch.zeros(num_articles,device=device)
                 
-                for article in transactions[customer]:
+                for article,_ in transactions[customer]:
                     img_name = os.path.join(images_dir, article + '.jpg')
                     if os.path.exists(img_name):
                         
