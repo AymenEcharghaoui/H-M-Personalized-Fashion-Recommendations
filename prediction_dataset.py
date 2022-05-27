@@ -160,7 +160,31 @@ class ArticlesDataset(Dataset):
             return (self.transform(image),label)
         
         return (image,label)
+    
+class PredictionDataset(Dataset):
 
+    def __init__(self, group_id, images_dir, group_size, articles_list ,transform=None):
+        self.group_id = group_id
+        self.images_dir = images_dir
+        self.group_size = group_size
+        self.transform = transform
+        self.articles_list = articles_list
+        
+        self.length = len(articles_list)
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+
+        article_id = self.articles_list[idx]
+        img_name = os.path.join(self.images_dir,article_id+'.jpg')
+        image = io.imread(img_name)
+        
+        if self.transform:
+            return self.transform(image)
+        
+        return image
 
 class Rescale(object):
     """Rescale the image in a sample to a given size.
@@ -324,7 +348,7 @@ def score(tr_dir,pred_dir,num_recomm=12):
     map12 /= count_customers
     return map12
 
-def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,pred_dir,images_dir,num_reccom=12,transform=None) :
+def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,pred_dir,images_dir,batch_size,num_reccom=12,transform=None) :
     
     """
     store a sample submission csv file in pred_dir
@@ -373,17 +397,41 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                 transactions[customer][article] = 1
             else:
                 transactions[customer][article] += 1
+                
+    # creat a set of all articles_id with image
+    images_set = set([image[:-4] for image in os.listdir(images_dir)])
     
+    articles_list = []
+    article2recom = {}
     for key,value in transactions.items():
         value = sorted(value.items(),key=(lambda x: -x[1]))[:20]
         transactions[key] = value
+        for article_id,_ in value:
+            if article_id in images_set:
+                articles_list.append(article_id)
+                article2recom[article_id] = []
     
     print("creat transaction dic, time:",time.time()-begin_time)
-
+    
+    id_list = 0
+    for i in range(len(group_sizes)):
+        prediction_dataset = PredictionDataset(i, images_dir, group_sizes[i], articles_list,transform)
+        prediction_generator = DataLoader(prediction_dataset, batch_size = batch_size,shuffle = False, num_workers = 5)
+        
+        for image in prediction_generator:
+            with torch.no_grad():
+                image = image.to(device)
+                
+                output = models[i](image)
+                
+                for j in range(output.size(0)):
+                    article2recom[articles_list[id_list]].append(output[j].to("cpu"))
+    
+    print("creat recommendation dic, time:",time.time()-begin_time)
+        
     submission_file = open(pred_dir,'w',newline='')
     submission = csv.writer(submission_file,delimiter=',')
     submission.writerow(['customer_id','prediction'])
-    
     
     customers_df = pd.read_csv(tr_dir_valid, usecols=['customer_id'])
     customers_list = customers_df['customer_id'].unique()
@@ -396,46 +444,35 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
             num_new_customer += 1
         else:
             # a customer seen in transactions
-            with torch.no_grad():
-                recommandation = torch.zeros(num_articles,device=device)
+            recommandation = torch.zeros(num_articles,device=torch.device("cpu"))
                 
-                for article,_ in transactions[customer]:
-                    img_name = os.path.join(images_dir, article + '.jpg')
-                    if os.path.exists(img_name):
+            for article,_ in transactions[customer]:
+                    
+                # image of article to models
+                for i in range(len(group_sizes_cumm)):
+                    end = group_sizes_cumm[i]
+                    start = end - group_sizes[i]
+                    recommandation[start:end] += article2recom[article][i]
                         
-                        image = io.imread(img_name)
-                        if transform:
-                            image = transform(image)
-                        image = image.to(device)
-                        
-                        # image of article to models
-                        for i in range(len(models)):
-                            end = group_sizes_cumm[i]
-                            start = end - group_sizes[i]
-                            recommandation[start:end] += models[i](image.unsqueeze(0)).squeeze(0)
-                            
-                recommandation.to("cpu")
-                indices = recommandation.topk(num_reccom).indices
+            indices = recommandation.topk(num_reccom).indices
                 
-                articles = ""
-                for i in range(num_reccom):
-                    index = indices[i].item()
-                    j = 0
-                    while(index>=group_sizes_cumm[j]):
-                        j += 1
-                    # image in group j
-                    if(j>0):
-                        index -= group_sizes_cumm[j-1]
-                    # image index in group j is index
-                    articles += group2id[(j,index)]+ " "
-                articles = articles[:-1]
+            articles = ""
+            for i in range(num_reccom):
+                index = indices[i].item()
+                j = 0
+                while(index>=group_sizes_cumm[j]):
+                    j += 1
+                # image in group j
+                if(j>0):
+                    index -= group_sizes_cumm[j-1]
+                # image index in group j is index
+                articles += group2id[(j,index)]+ " "
+            articles = articles[:-1]
                 
         submission.writerow([customer,articles])        
         if k % 100 == 100-1:
             print('%d customers predicted' %(k + 1))
             print("time:",time.time()-begin_time)
-        if (k >= 2560):
-            break
         
     submission_file.close()
     print("number of new customer", num_new_customer, "total customer", len(customers_list))
@@ -450,7 +487,7 @@ if __name__ == '__main__':
     transactions_dir_valid = '/home/Biao/data/transactions_train_test1week.csv'
     articles_dir = '/home/Biao/data/articles_1month.csv'
     customers_dir = '/home/Biao/data/customers.csv'
-    predictions_dir = '/home/Biao/data/submission_1week.csv'
+    predictions_dir = '/home/Biao/data/submission_1week_dataset.csv'
     graph_dir = '/home/Biao/H-M-Personalized-Fashion-Recommendations/data/'
     
     batch_size = 64
@@ -477,8 +514,8 @@ if __name__ == '__main__':
     
     # change in tr_dir 
     predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,\
-            num_reccom=num_recomm,tr_dir_train=transactions_dir_train,tr_dir_valid=transactions_dir_valid,\
-            pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
+            tr_dir_train=transactions_dir_train,tr_dir_valid=transactions_dir_valid,\
+            pred_dir=predictions_dir,images_dir=images_dir,batch_size=batch_size,num_reccom=num_recomm,transform=myTransform)
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
 
