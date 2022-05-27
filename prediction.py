@@ -433,14 +433,14 @@ if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
     
-    images_dir = '/home/aymen/data/images__all/'
-    transactions_dir = '/home/aymen/data/transactions_train.csv'
-    transactions_dir_train = '/home/aymen/data/transactions_train_train1month.csv'
-    transactions_dir_valid = '/home/aymen/data/transactions_train_test1week.csv'
-    articles_dir = '/home/aymen/data/articles_1month.csv'
-    customers_dir = '/home/aymen/data/customers.csv'
-    predictions_dir = '/home/aymen/data/submission.csv'
-    graph_dir = '/home/aymen/data/'
+    images_dir = '/home/Biao/data/images__all/'
+    transactions_dir = '/home/Biao/data/transactions_train.csv'
+    transactions_dir_train = '/home/Biao/data/transactions_train_train1month.csv'
+    transactions_dir_valid = '/home/Biao/data/transactions_train_test1week.csv'
+    articles_dir = '/home/Biao/data/articles_1month.csv'
+    customers_dir = '/home/Biao/data/customers.csv'
+    predictions_dir = '/home/Biao/data/submission_1week.csv'
+    graph_dir = '/home/Biao/H-M-Personalized-Fashion-Recommendations/data/'
     
     batch_size = 64
     max_epoch = 10

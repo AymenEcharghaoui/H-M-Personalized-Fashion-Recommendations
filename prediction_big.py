@@ -442,14 +442,13 @@ if __name__ == '__main__':
     start_time = time.time()
     print('Is cuda available?', torch.cuda.is_available())
     
-    images_dir = '/home/aymen/data/images__all/'
-    transactions_dir = '/home/aymen/data/transactions_train.csv'
-    transactions_dir_train = '/home/aymen/data/transactions_train_train1month.csv'
-    transactions_dir_valid = '/home/aymen/data/transactions_train_test1week.csv'
-    articles_dir = '/home/aymen/data/articles_1month.csv'
-    customers_dir = '/home/aymen/data/customers.csv'
-    predictions_dir = '/home/aymen/data/submission.csv'
-    graph_dir = '/home/aymen/data/'
+    images_dir = '/home/Biao/data/images__all/'
+    transactions_dir = '/home/Biao/data/transactions_train.csv'
+    transactions_dir_train = '/home/Biao/data/transactions_train_train1month.csv'
+    articles_dir = '/home/Biao/data/articles_1month.csv'
+    customers_dir = '/home/Biao/data/customers.csv'
+    predictions_dir = '/home/Biao/data/submission.csv'
+    graph_dir = '/home/Biao/data/'
     
     batch_size = 64
     max_epoch = 10
@@ -474,8 +473,8 @@ if __name__ == '__main__':
         models.append(model)
     
     # change in tr_dir 
-    predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,\
-            num_reccom=num_recomm,tr_dir_train=transactions_dir_train,tr_dir_valid=transactions_dir_valid,\
+    bigPredictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,\
+            num_reccom=num_recomm,tr_dir_all=transactions_dir,cust_dir=customers_dir,\
             pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
