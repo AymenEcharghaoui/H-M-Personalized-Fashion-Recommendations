@@ -415,7 +415,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
     
     id_list = 0
     for i in range(len(group_sizes)):
-        prediction_dataset = PredictionDataset(i, images_dir, group_sizes[i], articles_list)
+        prediction_dataset = PredictionDataset(i, images_dir, group_sizes[i], articles_list,transform)
         prediction_generator = DataLoader(prediction_dataset, batch_size = batch_size,shuffle = False, num_workers = 5)
         
         for image in prediction_generator:
