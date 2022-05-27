@@ -514,8 +514,8 @@ if __name__ == '__main__':
     
     # change in tr_dir 
     predictions(models,id2group=id2group,group2id=group2id,group_sizes=group_sizes,\
-            num_reccom=num_recomm,tr_dir_train=transactions_dir_train,tr_dir_valid=transactions_dir_valid,\
-            pred_dir=predictions_dir,images_dir=images_dir,transform=myTransform)
+            tr_dir_train=transactions_dir_train,tr_dir_valid=transactions_dir_valid,\
+            pred_dir=predictions_dir,images_dir=images_dir,batch_size=batch_size,num_reccom=num_recomm,transform=myTransform)
     
     print("making final predictions for approximately the optimal value of epoch : --- %s seconds ---" % (time.time() - start_time))
 
