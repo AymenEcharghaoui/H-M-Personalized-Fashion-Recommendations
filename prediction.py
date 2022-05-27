@@ -341,7 +341,8 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
         images_dir (string): Directory with all the images.
     """
     begin_time = time.time()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     
     for i in range(len(models)):
         models[i].eval()
@@ -373,7 +374,7 @@ def predictions(models,id2group,group2id,group_sizes,tr_dir_train,tr_dir_valid,p
                 transactions[customer][article] += 1
     
     for key,value in transactions.items():
-        value = sorted(value.items(),key=(lambda x: -x[1]))[:5]
+        value = sorted(value.items(),key=(lambda x: -x[1]))[:10]
         transactions[key] = value
     
     print("creat transaction dic, time:",time.time()-begin_time)
